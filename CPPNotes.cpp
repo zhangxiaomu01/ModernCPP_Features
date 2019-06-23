@@ -231,14 +231,21 @@ cout << [](int x, int y){return x + y;}(3, 4) << endl; //print 7
 auto f = [](int x, int y){return x + y;};
 cout << f(3, 4) << endl; //print 7
 
+template<typename func>
+void filter(func f, vector<int>& A){
+    for(auto i : A){
+        if(f(i))
+            cout << i << " ";
+    }
+}
+int main(){
+    vector<int> V = {1,2,3,4,5,6};
+    int y = 4;
+    filter([](int x){return x>3;}, V); // Print out 4 5 6
 
-
-
-
-
-
-
-
-
+    filter([&](int x){return x > y;}, V); // Print out 5 6
+    //Note: [&] tells the compiler that we want variable capture
+    return 0;
+}
 
 
