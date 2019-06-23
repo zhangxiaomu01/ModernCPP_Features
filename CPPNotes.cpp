@@ -132,6 +132,106 @@ public:
 }
 
 
+/* 9. Override for virtual functions */
+//To avoid inadvertently create new functions in derived class
+class dog{
+    virtual void A(int a);
+    virtual void B() const;
+};
+
+class YellowDog : dog{
+    /* Explicitly tell the compiler that A and B should override the function from parent class. 
+    In this case, since we cannot find any valid function to override. Compiler will issue errors.
+     */
+    virtual void A(float) override; //error
+    virtual void B() override;//error
+}
+
+
+/* 10. final key word for virtual function and class */
+class dog final { //No class can be derived from dog any more
+    //...
+};
+
+class dog {
+    virtual void bark() final; //No derived class can override bark() any more
+};
+
+/* 11. Compiler generated default constructor */
+/*
+Typically, compiler will not generate default constructor if we provide one. However, in C++ 11 we can force the
+compiler to generate default constructor.
+ */
+class dog{
+public:
+    dog(int age){
+        //...
+    }
+};
+dog D1; //error: compiler cannot find constructor with no parameters
+
+class dog{
+public:
+    dog(int age){
+        //...
+    }
+    dog() = default; //Force the compiler to generate a default constructor
+};
+dog D1; // OK
+
+/* 12. delete key word */
+class dog{
+    dog(int age){
+        //...
+    }
+};
+dog D1(3); //OKay, with constructor we provide
+dog D2(4.0); //Okay, compiler will convert double to int and call the constructor we provide
+D1 = D2; //Okay, compiler will generate an assign constructor override for us
+/*
+If we want to restrict such situations, let's say users can only give integer as the age, we can restrict compiler by delete key word
+ */
+class dog{
+    dog(int age){
+        //...
+    }
+    dog(double age) = delete;
+    dog& operator=(const dog& d) = delete;
+};
+dog D1(3); //OKay, with constructor we provide
+dog D2(4.0); //Compile error
+D1 = D2;//Compile error
+
+
+/* 13. constexpr */
+int A[6]; // It's OKay
+int Func(){return 3;}
+int A[Func() + 3];//Error: Compile does not know the return value at compile time
+constexpr int Func(){return 3;}//Force the computation to happen at compile time, the return value is treated as constant value
+int A[Func()+ 3];//Okay, an array with length to be 6
+
+//Write a faster program
+constexpr int cubed(int x){ return x*x*x; } //Compile time calculation
+int k = cubed(26);
+
+
+/* 14. New string literals */
+//C++ 03
+char *a = "Hello World";
+
+//C++ 11
+char *a = u8"Hello World"; //UTF 8 string
+char16_t *b = u"Hello World"; //UTF 16 string
+char32_t *c = U"Hello World"; //UTF 32 string
+char* d = R"(Hello World)"; //Raw string
+
+
+/* 15. lambda function */
+cout << [](int x, int y){return x + y;}(3, 4) << endl; //print 7
+auto f = [](int x, int y){return x + y;};
+cout << f(3, 4) << endl; //print 7
+
+
 
 
 
