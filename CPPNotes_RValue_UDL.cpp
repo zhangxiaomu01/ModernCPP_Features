@@ -77,7 +77,14 @@ dog().bark(); // bark() might change the dog object state
 //1. Every C++ expression yields either a L-value or R-value
 //2. If the expression has an identifiable memory address, it's L-value. Or it's R-value
 
+/****************************************************************************/
+//What is R-value reference?
 
+int main(){
+    int a = 7; //L-value
+    int &b = a; //L-value reference
+
+}
 
 
 
