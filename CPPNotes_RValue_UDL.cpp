@@ -79,13 +79,77 @@ dog().bark(); // bark() might change the dog object state
 
 /****************************************************************************/
 //What is R-value reference?
-
+//Example 1:
+//We can use L-value and R-value type to do the function overloading
+void printOut(int& i){cout << "L-value reference;"<<endl; }
+void printOut(int&& i){cout << "R-value reference;"<<endl;}
+//void printOut(int i){cout << "R-value reference;"<<endl;} // Not valid here, compiler cannot tell the ambiguity
 int main(){
     int a = 7; //L-value
     int &b = a; //L-value reference
-
+    int &&c = 9; //R-value reference
+    printOut(a); //Call printOut(int &i), pass by L-value reference
+    printOut(7); //Call printOut(int &&i),pass by R-value reference
 }
+//Example 2:
+class TestC{
+private:
+    int m_Size;
+    double * m_Double;
+public:
+    TestC(const TestC& C){ //Can accept R-value because of the const here
+        m_Size = C.m_Size;
+        m_Double = new double[m_Size];
+        for(int i = 0; i < m_Size; i++){
+            m_Double[i] = C[i];
+        }
+    }
+    TestC(TestC&& C){ //move constructor, we remove const here, because we need to change C
+        m_Size = C.m_Size;
+        m_Double = C.m_Double; //Move the existing content to current array
+        C.m_Double = nullptr; //We need this here, because we need to prvent the destructor clean up the memory
+    }
+    ~TestC(){
+        delete []m_Double;
+    }
+};
 
+void foo(TestC cC);
+TestC createTestC(); // Creates a new TestC object
+void foo_byRef(Test &cC);
+
+void main(){
+    TestC reusable = createTestC();
+    foo_byRef(reusable); //The cheapest operation, no constructor involved
+    foo(reusable); //Will call the copy constructor
+    //Reusable will not be used any more
+    foo(std::move(reusable)); //Move the resuable to foo function with move constructor. The pointer in Reusable is nullptr after the std::move()
+    //Do not use the resuable after the move 
+    foo(createTestC()); //will call move constructor, since the return value is an R-value
+}
+//==================================================================//
+//Note 1: the most useful of R-value reference is to overload copy construtor
+//and copy assignment operator. We can achieve moving sementics by using R-value reference.
+X& X::operator=(X const & rhs);
+X& X::operator=(X && rhs);
+
+//Note 2: Move sementics have been implemented for all STL containers.
+//In C++ 11, your code will be faster without changing anything;
+//Passing by value can be used for STL containers
+vector<int> foo(){
+    //...
+    return myVector;
+}
+void hoo(string s);
+bool goo(vector<int>& v);
+//==================================================================//
+//Summary:
+/*
+Move constructor/move assignment constructor:
+Purpose: conveniently avoid costly and unnecessary deep copy
+1. They are particularly powerful where passing by value and passing by reference are both used;
+2. Theu give you finer control of which part of your object to be moved.
+ */
 
 
 
