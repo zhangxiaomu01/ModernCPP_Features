@@ -91,7 +91,7 @@ int main(){
     printOut(a); //Call printOut(int &i), pass by L-value reference
     printOut(7); //Call printOut(int &&i),pass by R-value reference
 }
-//Example 2:
+//Example 2: Moving sementics
 class TestC{
 private:
     int m_Size;
@@ -148,8 +148,41 @@ bool goo(vector<int>& v);
 Move constructor/move assignment constructor:
 Purpose: conveniently avoid costly and unnecessary deep copy
 1. They are particularly powerful where passing by value and passing by reference are both used;
-2. Theu give you finer control of which part of your object to be moved.
+2. They give you finer control of which part of your object to be moved.
  */
+//==================================================================//
+
+//2. Perfect Forwarding
+//Example 1:
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
