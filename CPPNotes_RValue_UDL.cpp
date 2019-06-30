@@ -154,10 +154,81 @@ Purpose: conveniently avoid costly and unnecessary deep copy
 
 //2. Perfect Forwarding
 //Example 1:
+void foo(TestC c);//TestC has both copy constructor and move constructor
+
+template<typename T>
+void relay(T arg){
+    foo(arg);
+}
+int main(){
+    TestC testObj = createTestC();
+    relay(testObj);
+    //...
+    relay(createTestC());
+}
+/*
+When we want to call relay() function, we want to meet two requirements:
+1. No costly and unnecessary copy constructor of TestC class;
+2. R-value is forwarded as R-value and L-value is forwarded as L-value. The argument passed to relay() should be the same as the argument passed to foo().
+ */
+//The solution is: this will work because T is a template
+template<typename T>
+void relay(T&& arg){ 
+    foo(std::forward<T>(arg));// forward is needed
+}
+//Implementation of std::forward()
+template <class T>
+T&& forward(typename remove_reference<T>::type& arg){
+    return static_cast<T&&> (arg);
+}
 
 
+//Reference collapsing rule (C++ 11):
+/*
+T& &   ==> T&
+T&& &  ==> T&
+T& &&  ==> T&
+T&& && ==> T&&
+ */
 
+template<typename T>
+struct remove_reference; //It removes the reference of type T
+//T is int&
+remove_reference<int &>::type i; //int i
+//T is int
+remove_reference<int>::type i; //int i
 
+//Back to the solution:
+template<typename T>
+void relay(T&& arg){ 
+    foo(std::forward<T>(arg));// forward is needed
+}
+/*
+//9 is a R-value, so T is equivalent to int&&
+relay(9); => T == int&& => T&& => int&& && => int&&
+
+//x is L-value, it's type is int&. No matter x is L-value or L-value reference. L-value => L-value reference
+relay(x); => T == int& => T&& => int&& & => int& 
+ */
+
+/*
+T&& is Universal reference(L-value, R-value, const, non-const, etc...):
+Conditions:
+1. T is a template type;
+2. Type deduction (reference collasing) happends to T.
+    -T is a function template type, not a class template type
+ */
+
+//std::move() and std::forward()
+std::move<T>(arg); //Turn arg into R-value 
+std::forward<T>(arg); //Turn arg into T&&
+
+/*
+Summary:
+Main usage of R-reference:
+1. Moving semantics
+2. Perfect forwarding
+ */
 
 
 
