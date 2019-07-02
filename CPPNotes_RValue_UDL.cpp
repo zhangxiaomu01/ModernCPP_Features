@@ -152,4 +152,53 @@ Purpose: conveniently avoid costly and unnecessary deep copy
  */
 
 
+/* 2. C++ 11: User Defined Literals */
+//Literals are constants:
+/*
+4 types of C++ built-in literals:
+integer         -- 45
+floating point  -- 4.5
+character       -- 'z'
+string          -- "dog"
+ */
+45; // int literal
+45u; //unsigned int (suffix specifies type)
+45l; //long
 
+//C++ 99:
+long double height = 3.4; //Meters? Centimeters? Inchies? We don't know
+//Ideally, always attach units to the values:
+height = 3.4cm;
+ratio = 3.4cm / 2.1mm; //ratio = 3.4 * 10 / 2.1
+
+//User defined literals. Note underscore can be omitted
+long double operator"" _cm(long double x) {return x * 10;}
+long double operator"" _m(long double x){return x * 1000;}
+long double operator"" _mm(long double x){return x;}
+
+long double height = 3.4_cm;
+std::cout << height << std::endl; //Output 34...
+
+int operator"" _bin(const char* str, size_t l){
+    int res = 0;
+    for(int i = 0; i < l; i++){
+        res = res << 1;
+        if(str[i] == '1')
+            res += 1;
+    }
+    return res;
+}
+cout << "01110"_bin <<endl; //covert binary string to integer
+
+/*****************Restrictions*****************
+ * User defined type can only work with the following parameters:
+ * char const*
+ * unsigned long long
+ * long double
+ * char const*, std::size_t
+ * wchar_t const*, std::size_t
+ * char16_t const*, std::size_t
+ * char32_t const*, std::size_t
+ * 
+ * Return value can be of any type!!!!
+ */
