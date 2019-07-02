@@ -232,30 +232,6 @@ Main usage of R-reference:
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* 2. C++ 11: User Defined Literals */
 //Literals are constants:
 /*
