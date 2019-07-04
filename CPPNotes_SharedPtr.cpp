@@ -81,6 +81,23 @@ void fooFunc(){
 
 }// count will be 0 when code executes to here
 
+void booFunc(){
+    shared_ptr<Dog> p1 = make_shared<Dog>("Gunner");
+    shared_ptr<Dog> p2 = make_shared<Dog>("Tank");
+    // In the following situation, Gunner is deleted
+    p1 = p2; 
+    //p1 = nullptr; 
+    //p1.reset();
+
+    //Sometimes we have to use constructor to create shared pointer instead of make_shared<class>(). We will take a look at below:
+    shared_ptr<Dog> p3 = make_shared<Dog>("Shooter"); //using default deleter: operator delete
+    shared_ptr<Dog> p4 = shared_ptr<Dog>(new Dog("Tank"), [](Dog* p){cout << "Custome deleting."; delete p;}); //Define our own custome deleter
+    shared_ptr<Dog> p5(new Dog[3]) //Dog[1] and Dog[2] have memory leak.
+    shared_ptr<Dog> p6(new Dog[3], [](Dog* p){delete[] p;}); //All 3 dogs will be deleted when p goes out of scope
+
+    Dog* ptr = p1.get(); //Returns the raw pointer. In general, avoid using raw pointer when necessary
+}
+
 int main(){
     fooFunc();
     Dog* d = new Dog("Tank"); //Should not use
