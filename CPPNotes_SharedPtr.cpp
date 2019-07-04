@@ -1,4 +1,7 @@
 #include<iostream>
+#include<string>
+#include<memory>
+using namespace std;
 /* 1. C++ 11: Compiler generated function */
 /*
 * C++ 03:
@@ -48,10 +51,53 @@ class Cow{ // 1, 2, 4 ... (2 is deprecated. Still there, should not use it accor
 
 
 
+/* 2. C++ 11: Shared pointer */
+class Dog{
+    string m_name;
+    public:
+    Dog(string name){cout << "Dog is created: "<< name <<endl; m_name = name;}
+    Dog(){cout << "Nameless dog created. " << name <<endl; m_nam = "nameless";}
+    ~Dog(){cout << "Dog is destroyed: " << m_name <<endl;}
+    void bark(){cout << "Dog " << m_name << "rules!" << endl;}
+};
+//Hard to track when to delete pointer in large project
+void foo(){
+    Dog* p = new Dog("Gunner");
+    //...
+    delete p;
+    //...
+    p->bark(); // p is a dangling pointer now -- undefined behavior
+}// If we do not delete p, then we will have memory leak
 
+void fooFunc(){
+    //We will have a count to keep track of how many pointers are pointing to the object.
+    shared_ptr<Dog> p(new Dog("Gunner")); // count == 1 now
+    {
+        shared_ptr<Dog> p2 = p; //count == 2
+        p2->bark();
+        cout << p.use_count() << endl; //Output how many pointers we have
+    }
+    p->bark(); //count == 1
 
+}// count will be 0 when code executes to here
 
+int main(){
+    fooFunc();
+    Dog* d = new Dog("Tank"); //Should not use
+    shared_ptr<Dog> p(d); // p.get_count() == 1
+    //Here when p goes out of scope, d will be destroyed. Then p2 goes out of scope, p2 will be destroyed again...
+    shared_ptr<Dog> p2(d); // p2.get_count() == 1
+    /* Lesson: An object should be assigned to a shrared_pointer immediately when it is created. The above case does not follow this rule. We first create the raw pointer d and then initialize p and p2 with d. We should do somthing like: shared_ptr<Dog> p(new Dog("Tank")), then shared_ptr<Dog> p2 = p.*/
 
+    //Another way to create a shared pointer:
+    shared_ptr<Dog> p = make_shared<Dog>("Thank"); //Faster and safer/ Exception safe
+    (*p).bark();
+    //The following function can also work on shared pointers
+    // static_pointer_cast
+    // dynamic_pointer_cast
+    // const_pointer_cast
+    return 0;
+}
 
 
 
