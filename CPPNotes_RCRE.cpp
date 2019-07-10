@@ -77,13 +77,14 @@ int main(){
 
 
 //C++ 11
-class Person{
+//Solution: We can use shared pointer to handle the resource allocation and recycle
+class Person {
 private:
-    string* m_name;
+	shared_ptr<string> m_name;
 public:
-    Person(string name): m_name(new string(name)){}
-    ~Person() {delete m_name;}
-    void printName() { cout << *m_name; }
+	Person(string name) : m_name(new string(name)) {}
+	//~Person() { delete m_name; } //Remember to remove the destructor
+	void printName() { cout << *m_name; }
 };
 
 int main(){
@@ -93,6 +94,27 @@ int main(){
     cout << "Goodbye!" << endl;
     system("pause");
     return 0;
+}
+
+//Solution: use unique pointer (which is cheaper)
+class Person {
+private:
+	unique_ptr<string> m_name;
+public:
+	Person(string name) : m_name(new string(name)) {}
+    ~Person(){}
+    Person(Person&&) = default;
+	void printName() { cout << *m_name; }
+};
+
+int main() {
+	vector<Person> persons;
+	Person p("Jack");
+	persons.push_back(move(p));//Note that unique_ptr cannot be copied, so we need to use move() function here!! In order to use std::move(), we cannot define our own destructor, or compile cannot generate the move constructor for us. If we really need the destructor, we can explicitly define a move constructor!
+	persons.front().printName();
+	cout << "Goodbye!" << endl;
+	system("pause");
+	return 0;
 }
 
 
