@@ -133,7 +133,7 @@ int main(){
         cin>>str;
         
         //using regular expression grammar: ECMAScript (default)
-        //regex e("^abc.", regex_constants::ECMAScript);
+        //regex e("^abc.", regex_constants::grep);
 
         //match string with exactly "abc"
         //regex e("abc"); 
