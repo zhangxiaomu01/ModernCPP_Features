@@ -271,3 +271,80 @@ int main() {
 	}
 	return 0;
 }
+
+//Iterators
+//regex_iterator
+//regex_token_iterator
+
+// regex_iterator: pointing to the match results
+//If we want to extract all the matches in our string str:
+//The following approach won't work! We can only extract the first matching
+//result
+int main() {
+	string str = "zhangxm01@gmail.com; zhan@163.com; zhan_j@yahoo.com";
+    smatch m; 
+    regex e("([[:w:]]+)@([[:w:]]+)\.com");
+
+    bool found = regex_search(str, m, e);
+    for(int i = 0; i < m.size(); ++i){
+        //print out the matched results
+        cout << "m[" << i <<"]: str() = " << m[i].str() <<endl;
+    }
+	system("pause");
+	return 0;
+}
+
+//We can use regular expression iterator here!
+int main() {
+	string str = "zhangxm01@gmail.com; zhan@163.com; zhan_j@yahoo.com";
+    regex e("([[:w:]]+)@([[:w:]]+)\.com");
+
+    //regex iterator
+    sregex_iterator pos(str.cbegin(), str.cend(), e);
+
+    //default constructor defines past-the-end iterator
+    sregex_iterator end; 
+    
+    for(; pos != end; ++pos){
+        cout << "Matched: " << pos->str(0) << endl;
+        cout << "User Name: " << pos->str(1) << endl;
+        cout << "Domain: " << pos->str(2) <<endl;
+        cout << endl;
+    }
+	system("pause");
+	return 0;
+}
+
+//regex_token_iterator: pointing to a sub match
+int main() {
+	string str = "zhangxm01@gmail.com; zhan@163.com; zhan_j@yahoo.com";
+    regex e("([[:w:]]+)@([[:w:]]+)\.com");
+
+    //regex iterator
+    sregex_token_iterator pos(str.cbegin(), str.cend(), e);
+
+    //default constructor defines past-the-end iterator
+    sregex_token_iterator end; 
+    
+    for(; pos != end; ++pos){
+        //str() cannot have any parameters
+        cout << "Matched: " << pos->str() << endl;
+        cout << endl;
+    }
+	system("pause");
+	return 0;
+}
+
+//regex_replace 
+int main() {
+	string str = "zhangxm01@gmail.com; zhan@163.com; zhan_j@yahoo.com";
+    regex e("([[:w:]]+)@([[:w:]]+)\.com");
+    //$1 and $2 represents the group 1 and group 2 in the regex
+    cout <<regex_replace(str, e, "$1 is on $2") << endl;;
+    //We can add more flags in the regex_replace function
+	cout << regex_replace(str, e, "$1 is on $2", regex_constants::format_no_copy|regex_constants::format_first_only);
+	cout<< endl;
+
+	system("pause");
+	return 0;
+}
