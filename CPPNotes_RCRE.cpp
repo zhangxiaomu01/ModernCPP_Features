@@ -121,13 +121,20 @@ int main() {
 #include<regex>
 /* 2. C++ 11 Regular Expression */
 /*
-Regular Expression: a regular expression is a specific pattern that provides concise and flexible means to "match" strings of text, such as particular characters, words, or patterns of characters. - wikipedia
+Regular Expression: a regular expression is a specific pattern that 
+provides concise and flexible means to "match" strings of text, 
+such as particular characters, words, or patterns of characters. 
+- wikipedia
  */
+//Basic grammar
 int main(){
     string str;
     while(true){
         cin>>str;
         
+        //using regular expression grammar: ECMAScript (default)
+        //regex e("^abc.", regex_constants::ECMAScript);
+
         //match string with exactly "abc"
         //regex e("abc"); 
 
@@ -147,11 +154,13 @@ int main(){
         //1 or more preceding characters.
         //regex e("abc+");
 
-        //[...] Any character inside the square brackets, represents 1 character
+        //[...] Any character inside the square brackets, represents 
+        //1 character
         //e.g. "abcd", "abc", "abcccddd", "abdcdc" are matches
         //regex e("ab[cd]*"); 
 
-        //[^...] Any character not inside the squre brackets, represents 1 character
+        //[^...] Any character not inside the squre brackets, 
+        //represents 1 character
         //regex e("ab[^cd]*");
 
         //{number} exact match the [number] of preceding characters
@@ -177,7 +186,8 @@ int main(){
         //e.g. "abcdeeeeabc" is a match
         //regex e("(abc)de+\\1");
 
-        //Note (de+) defines the group, if we have (de+) defined as "deee", then for group 2, it should always be "deee"
+        //Note (de+) defines the group, if we have (de+) defined 
+        //as "deee", then for group 2, it should always be "deee".
         //regex e("(ab)*c(de+)\\2\\1");
 
         //matching any e-mail address
@@ -204,7 +214,8 @@ int main(){
 
         //check whether str can be matched with regular expression e
         bool match = regex_match(str, e);
-        //search the string str to see whether there is a substring of str, that can be matched with e
+        //search the string str to see whether there is a substring 
+        //of str, that can be matched with e
         bool isFound = regex_search(str, e);
 
         cout << (match ? "Matched" : "Not matched") << endl << endl;
@@ -212,3 +223,51 @@ int main(){
     return 0;
 }
 
+/*
+Regular Expression Grammars in C++:
+- ECMAScript (default)
+- basic
+- extended
+- awk
+- grep
+- egrep
+ */
+
+// submatch
+/*
+std::match_result<> - store the detailed matches!
+smatch              - detailed match in string!
+
+smatch m;
+m[0].str() - The entire match (same with m.str(), m.str(0))
+m[1].str() - The substring that matches the first group (same as m.str(1))
+m[2].str() - The substring that matches the second group
+m.prefix() - Everything before the first matched character
+m.suffix() - Everything after the last matched character
+ */
+int main() {
+	string str;
+	while (true) {
+		cin >> str;
+        smatch m; //typedef std::match_results<string>
+
+        //We can define two groups here to extract the user name and 
+        //domain name
+		regex e("([[:w:]]+)@([[:w:]]+)\.com");
+
+		//search the string for regular expression e and save the 
+        //results to m
+		bool match = regex_search(str, m, e);
+
+        cout << "match size: " << m.size() << endl;
+        for(int i = 0; i < m.size(); ++i){
+            //print out the matched results
+            cout << "m[" << i <<"]: str() = " << m[i].str() <<endl;
+        }
+        //prefix is everything before the first matched character
+        cout <<"m.prefix().str(): " << m.prefix().str() << endl;
+        //suffic is everything after the last matched character
+        cout <<"m.suffix().str(): " << m.suffix().str() <<endl;
+	}
+	return 0;
+}
