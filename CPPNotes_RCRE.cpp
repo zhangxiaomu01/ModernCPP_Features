@@ -118,3 +118,97 @@ int main() {
 }
 
 
+#include<regex>
+/* 2. C++ 11 Regular Expression */
+/*
+Regular Expression: a regular expression is a specific pattern that provides concise and flexible means to "match" strings of text, such as particular characters, words, or patterns of characters. - wikipedia
+ */
+int main(){
+    string str;
+    while(true){
+        cin>>str;
+        
+        //match string with exactly "abc"
+        //regex e("abc"); 
+
+        //match string with "abc", ignore lowercase or uppercase
+        //regex e("abc", regex_constants::icase);
+
+        //'.' matches to any character except the newline
+        //regex e("abc."); 
+
+        //'?' matches 0 or 1 preceding characters!
+        //e.g. "ab", "abc" will be matches
+        //regex e("abc?");
+
+        //matches 0 or more preceding characters.
+        //regex e("abc*");
+
+        //1 or more preceding characters.
+        //regex e("abc+");
+
+        //[...] Any character inside the square brackets, represents 1 character
+        //e.g. "abcd", "abc", "abcccddd", "abdcdc" are matches
+        //regex e("ab[cd]*"); 
+
+        //[^...] Any character not inside the squre brackets, represents 1 character
+        //regex e("ab[^cd]*");
+
+        //{number} exact match the [number] of preceding characters
+        //e.g. "abccc", "abcdd", "abcdc" are matches
+        //e.g. "abcdcdcd", "abdddccc", "ab" are not matches
+        //regex e("ab[cd]{3}");
+
+        //matches 3 or more preceding characters
+        //regex e("ab[cd]{3,}");
+
+        //matches 3, 4 or 5 preceding characters
+        //regex e("ab[cd]{3,5}");
+
+        //| - OR
+        //e.g. "abc", "def", "deg" are matches
+        //"abcd", "defg" are not matches
+        //regex e("abc|de[fg]");
+
+        //matches ']'
+        //regex e("\]");
+
+        //\1 represents the group 1, the () defines the group
+        //e.g. "abcdeeeeabc" is a match
+        //regex e("(abc)de+\\1");
+
+        //Note (de+) defines the group, if we have (de+) defined as "deee", then for group 2, it should always be "deee"
+        //regex e("(ab)*c(de+)\\2\\1");
+
+        //matching any e-mail address
+        //[[:w:]] word character: digit, number, or underscore!
+        //regex e("[[:w:]]+@[[:w:]]+\.com");
+
+        //'^' marks that "abc" should be at the beginning of the string
+        //regex e("^abc", regex_constants::icase);
+
+        //'$' marks that "abc." should appear at the end of the string
+        regex e("abc.$", regex_constants::icase);
+
+        /*
+        [:s:] - a white space character;
+        [:w:] - a word character;
+        [:d:] - a decimal digit character;
+        [:upper:] - an uppercase character;
+        [:lower:] - a lowercase character;
+        [:alnum:] - an alpha-numerical character;
+        [:alpha:] - an alphabetic character;
+        [:blank:] - a blank character;
+        [:punct:] - a punctuation mark character
+         */
+
+        //check whether str can be matched with regular expression e
+        bool match = regex_match(str, e);
+        //search the string str to see whether there is a substring of str, that can be matched with e
+        bool isFound = regex_search(str, e);
+
+        cout << (match ? "Matched" : "Not matched") << endl << endl;
+    }
+    return 0;
+}
+
