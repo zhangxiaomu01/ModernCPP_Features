@@ -23,6 +23,18 @@ Duration:
     hours...
 
     system_clock::duration -- duration<T, system clock::period>
+
+    std::chrono::time_point<>: represents a point of time
+    00:00 January 1st, 1970 (corordinated Universal Time - UTC) - 
+    epoch of a clock
+
+    time_point<system_clock, millisecond>: according to system_clock, 
+    the elapsed time since epoch in milliseconds.
+
+    system_clock::time_point -- time_point<system_clock, system_clock::duration>
+    steady_clock::time_point -- time_point<steady_clock, steady_clock::duration>
+
+
 */
 
 int main(){
@@ -45,6 +57,23 @@ int main(){
     
     mi = mill + mi; //4700
 
+    //Time point//
+    //current time of system clock
+    chrono::system_clock::time_point tp = chrono::system_clock::now();
+    cout << tp.time_since_epoch().count() << endl;
+
+    tp = tp + chrono::seconds(2);
+    cout << tp.time_since_epoch().count() << endl;
+
+    //Measure the time span
+    chrono::steady_clock::time_point start = chrono::steady_clock::now();
+    cout <<"I am bored!!!" <<endl;
+    chrono::steady_clock::time_point end = chrono::steady_clock::now();
+    chrono::steady_clock::duration d = end - start;
+    if(d == chrono::steady_clock::duration::zero()){
+        cout << "No time elapsed!" <<endl;
+    }
+    cout << chrono::duration_cast<chrono::microseconds>(d).count() <<endl;
     
     system("pause");
     return 0;
