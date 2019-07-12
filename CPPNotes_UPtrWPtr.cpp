@@ -42,7 +42,11 @@ public:
         //Compile error. m_pFriend cannot direct access the object like the normal pointer.
         cout << "My Friend is: " << m_pFriend->m_name <<endl;
 
-        // The following code fix the problem. lock() function will create a shared_ptr of weak_ptr. It will check whether the weak pointer is still pointing to a valid object, and make sure that when the weak pointer is accessing the object, the object has not been deleted!
+        // The following code fix the problem. lock() function will create 
+        //a shared_ptr of weak_ptr. It will check whether the weak pointer 
+        //is still pointing to a valid object, and make sure that when the
+        // weak pointer is accessing the object, the object has not been 
+        //deleted!
         //If the weak pointer is empty, the lock() will throw an exception.
         if(!m_pFriend.expired())
             cout << "My Friend is: " << m_pFriend.lock()->m_name <<endl;

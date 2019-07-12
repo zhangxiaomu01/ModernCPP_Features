@@ -72,6 +72,19 @@ void foo(){
 void fooFunc(){
     //We will have a count to keep track of how many pointers are pointing to the object.
     shared_ptr<Dog> p(new Dog("Gunner")); // count == 1 now
+
+    //This is not allowed
+    //shared_ptr<Dog> pt = new Dog("Smile");
+
+    //Returns the raw pointer. 
+    //In general, avoid using raw pointer when use smart pointers
+    Dog* ptr = p.get(); 
+
+    //We can dereference the smart pointer just like the raw pointer
+    (*p).bark();
+    //Use the shared pointer just like the raw pointer.
+    p->bark();
+
     {
         shared_ptr<Dog> p2 = p; //count == 2
         p2->bark();
@@ -79,9 +92,28 @@ void fooFunc(){
     }
     p->bark(); //count == 1
 
-}// count will be 0 when code executes to here
+}// count will be 0 when code executes to here, and Gunner will be deleted
+
+void foo_01Func(){
+    Dog* d = new Dog("Tank"); //Should not use
+    shared_ptr<Dog> p(d); // p.get_count() == 1
+    //Here when p goes out of scope, d will be destroyed. 
+    //Then p2 goes out of scope, p2 will be destroyed again...
+    shared_ptr<Dog> p2(d); // p2.get_count() == 1, the counter won't increase
+
+    /* Lesson: An object should be assigned to a shrared_pointer 
+    immediately when it is created. The above case does not follow 
+    this rule. We first create the raw pointer d and then initialize 
+    p and p2 with d. We should do somthing like: 
+    shared_ptr<Dog> p(new Dog("Tank")), then shared_ptr<Dog> p2 = p.*/
+
+}
 
 void booFunc(){
+    //Another way to create a shared pointer:
+    //Faster and safer/ Exception safe
+    shared_ptr<Dog> p = make_shared<Dog>("Thank"); 
+
     shared_ptr<Dog> p1 = make_shared<Dog>("Gunner");
     shared_ptr<Dog> p2 = make_shared<Dog>("Tank");
     // In the following situation, Gunner is deleted
@@ -89,26 +121,23 @@ void booFunc(){
     //p1 = nullptr; 
     //p1.reset();
 
-    //Sometimes we have to use constructor to create shared pointer instead of make_shared<class>(). We will take a look at below:
-    shared_ptr<Dog> p3 = make_shared<Dog>("Shooter"); //using default deleter: operator delete
-    shared_ptr<Dog> p4 = shared_ptr<Dog>(new Dog("Tank"), [](Dog* p){cout << "Custome deleting."; delete p;}); //Define our own custome deleter
-    shared_ptr<Dog> p5(new Dog[3]) //Dog[1] and Dog[2] have memory leak.
-    shared_ptr<Dog> p6(new Dog[3], [](Dog* p){delete[] p;}); //All 3 dogs will be deleted when p goes out of scope
+    //Sometimes we have to use constructor to create shared pointer 
+    //instead of make_shared<class>(). We will take a look at below:
+    //using default deleter: operator delete
+    shared_ptr<Dog> p3 = make_shared<Dog>("Shooter"); 
 
-    Dog* ptr = p1.get(); //Returns the raw pointer. In general, avoid using raw pointer when necessary
+    //Define our own custome deleter
+    shared_ptr<Dog> p4 = shared_ptr<Dog>(new Dog("Tank"), [](Dog* p){cout << "Custome deleting."; delete p;}); 
+    
+    //Dog[1] and Dog[2] have memory leak.
+    shared_ptr<Dog> p5(new Dog[3]);
+    //All 3 dogs will be deleted when p goes out of scope 
+    shared_ptr<Dog> p6(new Dog[3], [](Dog* p){delete[] p;}); 
 }
 
 int main(){
     fooFunc();
-    Dog* d = new Dog("Tank"); //Should not use
-    shared_ptr<Dog> p(d); // p.get_count() == 1
-    //Here when p goes out of scope, d will be destroyed. Then p2 goes out of scope, p2 will be destroyed again...
-    shared_ptr<Dog> p2(d); // p2.get_count() == 1
-    /* Lesson: An object should be assigned to a shrared_pointer immediately when it is created. The above case does not follow this rule. We first create the raw pointer d and then initialize p and p2 with d. We should do somthing like: shared_ptr<Dog> p(new Dog("Tank")), then shared_ptr<Dog> p2 = p.*/
 
-    //Another way to create a shared pointer:
-    shared_ptr<Dog> p = make_shared<Dog>("Thank"); //Faster and safer/ Exception safe
-    (*p).bark();
     //The following function can also work on shared pointers
     // static_pointer_cast
     // dynamic_pointer_cast
