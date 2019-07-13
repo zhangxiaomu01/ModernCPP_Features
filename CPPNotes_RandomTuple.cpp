@@ -73,11 +73,58 @@ int main(){
     //C++ stl provides 16 different engine types. 
     //Default engine is a balanced random number generator, reasonable
     //cost and randomization.
-
     system("pause");
     return 0;
 }
 
+/* 2. C++ 11 Random Number Distribution */
+int main(){
+    unsigned int seed = chrono::steady_clock::now().time_since_epoch().count();
+    default_random_engine e(seed);
+    //The range of the generated number is between [e.min(), e.max()]
+    cout << e() << endl; 
+
+    //If we want to generate a random number from the range [0, 5]
+    cout << e() % 6 << endl;
+    // Issues with the above code:
+    /* 1. Bad quality of randomness. The default engine can produce the 
+    *  random number pretty good between [e.min(), e.max()]. With % 
+    *  operation, this randomness does not holds.
+    *  2. Can only provide a uniform distribution! 
+    */
+
+    //Uniform distribution between [0, 5], inclusive
+    uniform_int_distribution<int> distr(0, 5);
+    //Now the random engine provides the randomness and distribution 
+    //object provides the distribution!
+    cout << distr(e) << endl; 
+
+    //Here Range is [0, 5), 5 not included
+    uniform_real_distribution<float> distrR(0, 5);
+    cout << distrR(e) << endl; 
+
+    //poisson distribution
+    poisson_distribution<int> distrP(1.0); // 1.0 is the mean
+    cout << distrP(e) << endl; 
+
+    cout << "Normal distribution: " << endl;
+    //10.0 is mean, 3.0 is standard deviation
+    normal_distribution<double> distrN(10.0, 3.0);
+    vector<int> v(20);
+    for(int i = 0; i < 800; i++){
+        int num = distrN(e); //convert double to int!
+        if(num >= 0 && num < 20){
+            v[num]++; //v[num] represents the frequency of num
+        }
+    }
+    for(int i = 0; i < 20; i++){
+        cout <<"  " << std::string(v[i], '+') << endl;
+    }
+    cout << endl;
+
+    system("pause");
+    return 0;
+}
 
 
 
