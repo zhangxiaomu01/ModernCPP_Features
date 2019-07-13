@@ -83,29 +83,40 @@ public:
 void test(){
     Dog* pD = new Dog("Gunner");
     pD->bark();
-    //If we return earlier, pD will cause memory leak!
+    //If we return here, or some exceptions happen here
+    //pD will cause memory leak!
     delete pD;
 }
 //Using unique pointer here 
 void test01(){
     unique_ptr<Dog> pD (new Dog("Gunner"));
     pD->bark();
-    //If we return earlier, pD will not cause memory leak!
-
-    Dog* p = pD.release(); // release() function will return the raw pointer. It will also change the ownership of unique pointer and set it to nullptr.
-    //pD.reset(new Dog(smokey)); //reset pD to other object, if unique pointer originally owns an object, that object will be deleted!
-    //pD.reset(); //same as pD = nullptr
-    if(!pD) {
-        cout << "pD is empty now." <<endl;
-    } 
+    //If we return earlier, or some exceptions happen here
+    //pD will not cause memory leak!
 }
 void test02(){
     //unique pointer can access the same object at different time
     unique_ptr<Dog> pD (new Dog("Gunner"));
     unique_ptr<Dog> pD1 (new Dog("Smile"));
     pD1->bark();
+    //Smile will be destroyed, and pD1 owns pD now
     pD1 = move(pD);
     pD1->bark();
+
+    //release() function will return the raw pointer. It will also 
+    //change the ownership of unique pointer and set it to nullptr.
+    Dog* p = pD1.release(); 
+
+    //reset pD to other object, if unique pointer originally owns an 
+    //object, that object will be deleted!
+    //pD.reset(new Dog(smokey)); 
+
+    //same as pD = nullptr
+    //pD.reset(); 
+
+    if(!pD1) { // pD1 is empty now
+        cout << "pD1 is empty now." <<endl;
+    } 
 }
 
 void foo(unique_ptr<Dog> p){
@@ -114,14 +125,19 @@ void foo(unique_ptr<Dog> p){
 
 unique_ptr<Dog> getDog(){
     unique_ptr<Dog> p(new Dog("Jack"));
-    //return p will use the move semantics! so p will no longer has the ownership of Jack
+    //return p will use the move semantics! 
+    //so p will no longer has the ownership of Jack
     return p;
 }
 
 void test03(){
     unique_ptr<Dog> pD (new Dog("DND"));
-    foo(move(pD));//Cannot directly pass to foo(), since pD is unique pointer. pD will be destroyed in foo().
-    unique_ptr<Dog> pD2 = getDog();//pD2 owns the jack now, so it's not nullptr!
+    //Cannot directly pass to foo(), since pD is unique pointer. 
+    //pD will be destroyed in foo().
+    foo(move(pD));
+
+    //pD2 owns the jack now, so it's not nullptr!
+    unique_ptr<Dog> pD2 = getDog();
     if(!pD2) {cout << "pD2 is nullptr. " << endl;}
 }
 
@@ -130,9 +146,12 @@ int main(){
     test01();
     test02();
     test03();
+
     //using customized deleter
     shared_ptr<Dog> pSD(new Dog[3], [](Dog *p){delete []p;});
-    //for unique pointer, we do not need customized deleter. Need to indicate it in template parameter: unique_ptr<Dog[]>.
+
+    //for unique pointer, we do not need customized deleter. 
+    //Need to indicate it in template parameter: unique_ptr<Dog[]>.
     unique_ptr<Dog[]> dogs(new Dog[3]);
 
     system("pause");
