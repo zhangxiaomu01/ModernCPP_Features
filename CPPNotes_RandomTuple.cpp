@@ -126,7 +126,94 @@ int main(){
     return 0;
 }
 
+/* 3. Tuple in C++ */
+#include<tuple>
+int main(){
+    tuple<int, string, char> t(23, "Test", 'b');
+    cout << get<0>(t) << endl; //Get the first element of the tuple
+    cout << get<1>(t) << endl;
+    cout << get<2>(t) << endl;
+
+    //Set the second element of the tuple. get<1>() returns the reference
+    //the index must be compile time constant!
+    get<1>(t) = "Jack"; 
+    //Will not work
+    //int i = 2;
+    //get<i>(t);
+
+    tuple<int, string, char> t2; //default constructor
+    t2 = tuple<int, string, char>(1, "Good", 'd');
+    //or we can do
+    t2 = make_tuple(1, "Hahaha", 's');
+    int x = 8;
+    string y = "Hello world";
+    char z = 'f';
+    //Extract values from a tuple to variables
+    //Now x == 1, y == "Hahaha", z=='s'
+    make_tuple(ref(x), ref(y), ref(z)) = t2;
+    //or we can do the same by:
+    tie(x, y, z) = t2;
+    //By using tie, we can ignore values
+    tie(x, ignore, z) = t2;
+
+    if(t > t2){//lexicographical comparison
+        cout << "t is larger than t2" << endl;
+        //member by member copy
+        t = t2; 
+    }
+
+    //Important feature: A tuple can store references
+    string st = "innnn";
+    tuple<string&> t3(st);
+    //st now changes to "TTTest"
+    get<0>(t3) = "TTTest";
+    //or we can do by
+    t3 = make_tuple(ref(st));
+
+    //Now t4 is <int, string, char, string&>
+    auto t4 = tuple_cat(t2, t3); 
+
+    //tyoe traits
+    cout << tuple_size<decltype(t4)>::value <<endl; //4
+    tuple_element<1, decltype(t4)>::type d;
+
+	system("pause");
+	return 0;
+}
+
+//When to use tuple? Why not struct? 
+tuple<string, int> getNameAge(){
+    return make_tuple("Bob", 34);
+}
+
+int main(){
+    struct {string name; int age;} p;
+    tuple<string, int> t;
+
+    //Struct can tell more detailed info like name and age.
+    cout << p.name << " " << p.age <<endl;
+    cout << get<0>(t) << " " << get<1>(t) << endl;
 
 
+    string name;
+    int age;
+    //A tuple can be used as a convenient one-time only data structure
+    //to transfer a group of data
+    tie(name, age) = getNameAge();
 
+    //Comparison of tuples
+    tuple<int, int, int> time1, time2; //hours, minutes, seconds
+    if(time1 > time2)
+        cout << "Time1 is a later time";
+
+    //multi index map
+    map<tuple<int, char, float>, string> m;
+    m[make_tuple(2, 'a', 3)] = "I am happy!";
+    
+    //Swap values!
+    int a, b, c;
+    tie (b, c, a) = make_tuple(a, b, c);
+    
+    return 0;
+}
 
