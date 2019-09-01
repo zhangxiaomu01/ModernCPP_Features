@@ -111,7 +111,85 @@ The observer pattern defines an one to many dependency between objects,
 that when one of the objects changes the states, all of its dependencies are 
 notified and updated automatically.
 */
+//Observer Pattern:
+//Class for observee, wheather information from whether station in our case
+class WheatherInfo {
+private:
+	//temperature
+	float m_temp;
+	//moisture
+	float m_mois;
+public:
+	WheatherInfo(float temperature, float mois) {
+		m_temp = temperature;
+		m_mois = mois;
+	}
+	void setTemp(float temperature) {
+		m_temp = temperature;
+	}
+	void setMoisture(float moisture) {
+		m_mois = moisture;
+	}
+	float getTemp() {
+		return m_temp;
+	}
+	float getMoisture() {
+		return m_mois;
+	}
+};
 
+//Abstract class for observers (different display monitors in our case)
+class Display {
+protected:
+	//Maintain a reference to wheather information
+	//When wheather information gets updated, automatically gets update here
+	WheatherInfo* m_wheathrInfo;
+public:
+	void setWhetherInfo(WheatherInfo* wi) {
+		m_wheathrInfo = wi;
+	}
+	virtual void showInfo() = 0;
+};
+
+//Observer 1
+class PhoneDisplay : public Display {
+public:
+	void showInfo() {
+		std::cout << "====== This is the phone display =======" << std::endl;
+		std::cout << "Current temperature is: " << m_wheathrInfo->getTemp() << "." << std::endl;
+		std::cout << "Current moinstrue is: " << m_wheathrInfo->getMoisture() << "." << std::endl;
+	}
+};
+
+//Observer 2
+class LCDDisplay : public Display {
+public:
+	void showInfo() {
+		std::cout << "====== This is the LCD display =======" << std::endl;
+		std::cout << "Temperature: " << m_wheathrInfo->getTemp() << "." << std::endl;
+		std::cout << "Moisture: " << m_wheathrInfo->getMoisture() << "." << std::endl;
+	}
+};
+
+int main() {
+	WheatherInfo currentWL(75.0f, 67.0f);
+	Display* myPhone = new PhoneDisplay();
+	myPhone->setWhetherInfo(&currentWL);
+	Display* myLCD = new LCDDisplay();
+	myLCD->setWhetherInfo(&currentWL);
+
+	myPhone->showInfo();
+	myLCD->showInfo();
+
+	currentWL.setTemp(34.0f);
+	currentWL.setMoisture(78.0f);
+
+	myPhone->showInfo();
+	myLCD->showInfo();
+
+	system("pause");
+	return 0;
+}
 
 //03. Decorator Pattern
 /*
