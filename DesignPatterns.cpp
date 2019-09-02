@@ -303,6 +303,9 @@ int main() {
 //Factory Method Pattern:
 //Different factories create different enemy combinations
 
+//Factory Method Pattern:
+//Different factories create different enemy combinations
+
 //Product base class (abstract, in our case, product is enmemy)
 class Enemy {
 public:
@@ -320,13 +323,7 @@ public:
 
 //Factory base class (in our case, factory is enemy spawner)
 class EnemySpawnFactory {
-protected:
-	std::vector<Enemy*> enemyList;
-	int numOfEnemy;
 public:
-	EnemySpawnFactory(std::vector<Enemy*>& V) {
-		enemyList = V;
-	}
 	void showEnemy(std::vector<Enemy*>& V) {
 		for (int i = 0; i < V.size(); ++i) {
 			std::cout << "Enemy " << V[i]->m_ID << " spawned!" << std::endl;
@@ -366,58 +363,122 @@ public:
 };
 
 //Concrete implementation of Factory, here we have different enemy spawner for different levels
+//Actually the concrete factory should be able to create concrete product
 class SpawnerLevel1 : public EnemySpawnFactory {
+private:
+	//A set of enemies
+	std::vector<Enemy*> res;
 public:
-	SpawnerLevel1(std::vector<Enemy*>& V) : EnemySpawnFactory(V){}
-	//Spawn 2 goblins and 1 orc
+	//Spawn 2 goblins and 1 orc: actually define the spawn rule
 	std::vector<Enemy*> SpawnEnemy() {
-		std::vector<Enemy*> res;
-		if (enemyList.size() < 2) {
-			std::cout << "The input enemy type is not sufficient!" << std::endl;
-			return res;
-		}
-		res.push_back(enemyList[0]);
-		res.push_back(enemyList[0]);
-		res.push_back(enemyList[1]);
+		Enemy* gob01 = new Goblin(1, 10, 3);
+		Enemy* gob02 = new Goblin(2, 8, 5);
+		Enemy* orc = new Orc(3, 20, 7);
+		res.push_back(gob01);
+		res.push_back(gob02);
+		res.push_back(orc);
 		showEnemy(res);
 		return res;
+	}
+	virtual ~SpawnerLevel1() {
+		for (auto it : res)
+			delete it;
 	}
 };
 
 class SpawnerLevel2 : public EnemySpawnFactory {
+private:
+	//A set of enemies
+	std::vector<Enemy*> res;
 public:
-	SpawnerLevel2(std::vector<Enemy*>& V) : EnemySpawnFactory(V) {}
-	//Spawn 2 goblins and 1 orc
+	//Spawn 1 goblins, 1 orc and 1 giant
 	std::vector<Enemy*> SpawnEnemy() {
-		std::vector<Enemy*> res;
-		if (enemyList.size() < 2) {
-			std::cout << "The input enemy type is not sufficient!" << std::endl;
-			return res;
-		}
-		res.push_back(enemyList[0]);
-		res.push_back(enemyList[1]);
-		res.push_back(enemyList[2]);
+		Enemy* gob = new Goblin(4, 12, 1);
+		Enemy* orc = new Orc(5, 20, 7);
+		Enemy* giant = new Giant(6, 35, 15);
+		res.push_back(gob);
+		res.push_back(orc);
+		res.push_back(giant);
 		showEnemy(res);
 		return res;
+	}
+	virtual ~SpawnerLevel2() {
+		for (auto it : res)
+			delete it;
 	}
 };
 
 
 int main() {
-	std::vector<Enemy*> EnemyList;
-	Enemy* gob = new Goblin(1, 10, 3);
-	Enemy* orc = new Orc(2, 20, 7);
-	Enemy* giant = new Giant(3, 35, 15);
-	EnemyList.push_back(gob);
-	EnemyList.push_back(orc);
-	EnemyList.push_back(giant);
-
-	EnemySpawnFactory* spawnL1 = new SpawnerLevel1(EnemyList);
-	spawnL1->SpawnEnemy();
-	EnemySpawnFactory* spawnL2 = new SpawnerLevel2(EnemyList);
-	spawnL2->SpawnEnemy();
+	SpawnerLevel1 spawnL1;
+	spawnL1.SpawnEnemy();
+	SpawnerLevel2 spawnL2;
+	spawnL2.SpawnEnemy();
 
 	system("pause");
 	return 0;
 }
+
+
+//Abstract Factory Pattern
+//Abstract Factory pattern provides an interface for creating families of 
+//related or dependent objects without specifying their concrete classes. 
+//(we can create multiple objects)
+//This pattern is similar to Factory Method pattern except it creates families of 
+//related or dependent objects
+//Please refer to the URMs 
+//Omit for now
+
+
+//Singleton Pattern
+//Singleton pattern ensures that a class has only one instance and provides 
+//a global access to that single instance.
+class Singleton {
+private:
+	Singleton(int x) { val = x; }
+
+	//Save the only reference here
+	static Singleton* instance;
+	int val;
+public:
+	//We use static function to get the only reference to the class
+	static Singleton* getInstance(int x) {
+		//If instance is not nullptr, we will directly return it
+		//Guarantee we have only 1 instance
+		if(instance == nullptr)
+			instance = new Singleton(x);
+		return instance;
+	}
+
+	void printVal() {
+		std::cout << "The singleton class has value: " << val << std::endl;
+	}
+
+	~Singleton() { delete instance; }
+};
+
+// Initialize static member of class (It's a must)
+Singleton* Singleton::instance = nullptr;
+
+
+int main() {
+	//Directly call the getInstance() function by class
+	static Singleton* sInstance = Singleton::getInstance(6);
+	sInstance->printVal();
+
+	//will not work, still print 6 here, we cannot make another instance
+	sInstance = Singleton::getInstance(15);
+	sInstance->printVal();
+
+	//The following will have problem,since constructor is private!
+	//Singleton* sInstance = new Singleton();
+
+	system("pause");
+	return 0;
+}
+
+
+
+
+
 
