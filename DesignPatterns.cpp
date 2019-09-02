@@ -297,4 +297,127 @@ int main() {
 
 //4. Factory Method Pattern
 //Factory Method
+//The factory method pattern defines an interface for creating an object, 
+//but let the subclasses to decide which classes to instantiate. Factory method 
+//let the classes defer instantiation to subclasses.
+//Factory Method Pattern:
+//Different factories create different enemy combinations
+
+//Product base class (abstract, in our case, product is enmemy)
+class Enemy {
+public:
+	int m_ID;
+	int m_HP;
+	int m_Damage;
+public:
+	Enemy(int id, int HP, int damage) {
+		m_ID = id;
+		m_HP = HP;
+		m_Damage = damage;
+	}
+	virtual void EnemyAbility() = 0;
+};
+
+//Factory base class (in our case, factory is enemy spawner)
+class EnemySpawnFactory {
+protected:
+	std::vector<Enemy*> enemyList;
+	int numOfEnemy;
+public:
+	EnemySpawnFactory(std::vector<Enemy*>& V) {
+		enemyList = V;
+	}
+	void showEnemy(std::vector<Enemy*>& V) {
+		for (int i = 0; i < V.size(); ++i) {
+			std::cout << "Enemy " << V[i]->m_ID << " spawned!" << std::endl;
+			std::cout << "HP: " << V[i]->m_HP << std::endl;
+			std::cout << "Damage: " << V[i]->m_Damage << std::endl;
+			V[i]->EnemyAbility();
+		}
+	}
+	//Different factory will define its specific spawn rule
+	virtual std::vector<Enemy*> SpawnEnemy() = 0;
+};
+
+
+//Product concrete implementation
+class Goblin : public Enemy {
+public:
+	Goblin(int ID, int HP, int Damage) : Enemy(ID, HP, Damage){}
+	void EnemyAbility() {
+		std::cout << "Goblin can sneak!" << std::endl;
+	}
+};
+
+class Orc : public Enemy {
+public:
+	Orc(int ID, int HP, int Damage) : Enemy(ID, HP, Damage) {}
+	void EnemyAbility() {
+		std::cout << "Orcs can have blood rage!" << std::endl;
+	}
+};
+
+class Giant : public Enemy {
+public:
+	Giant(int ID, int HP, int Damage) : Enemy(ID, HP, Damage) {}
+	void EnemyAbility() {
+		std::cout << "Orcs can have devastating power!" << std::endl;
+	}
+};
+
+//Concrete implementation of Factory, here we have different enemy spawner for different levels
+class SpawnerLevel1 : public EnemySpawnFactory {
+public:
+	SpawnerLevel1(std::vector<Enemy*>& V) : EnemySpawnFactory(V){}
+	//Spawn 2 goblins and 1 orc
+	std::vector<Enemy*> SpawnEnemy() {
+		std::vector<Enemy*> res;
+		if (enemyList.size() < 2) {
+			std::cout << "The input enemy type is not sufficient!" << std::endl;
+			return res;
+		}
+		res.push_back(enemyList[0]);
+		res.push_back(enemyList[0]);
+		res.push_back(enemyList[1]);
+		showEnemy(res);
+		return res;
+	}
+};
+
+class SpawnerLevel2 : public EnemySpawnFactory {
+public:
+	SpawnerLevel2(std::vector<Enemy*>& V) : EnemySpawnFactory(V) {}
+	//Spawn 2 goblins and 1 orc
+	std::vector<Enemy*> SpawnEnemy() {
+		std::vector<Enemy*> res;
+		if (enemyList.size() < 2) {
+			std::cout << "The input enemy type is not sufficient!" << std::endl;
+			return res;
+		}
+		res.push_back(enemyList[0]);
+		res.push_back(enemyList[1]);
+		res.push_back(enemyList[2]);
+		showEnemy(res);
+		return res;
+	}
+};
+
+
+int main() {
+	std::vector<Enemy*> EnemyList;
+	Enemy* gob = new Goblin(1, 10, 3);
+	Enemy* orc = new Orc(2, 20, 7);
+	Enemy* giant = new Giant(3, 35, 15);
+	EnemyList.push_back(gob);
+	EnemyList.push_back(orc);
+	EnemyList.push_back(giant);
+
+	EnemySpawnFactory* spawnL1 = new SpawnerLevel1(EnemyList);
+	spawnL1->SpawnEnemy();
+	EnemySpawnFactory* spawnL2 = new SpawnerLevel2(EnemyList);
+	spawnL2->SpawnEnemy();
+
+	system("pause");
+	return 0;
+}
 
