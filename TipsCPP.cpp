@@ -122,3 +122,37 @@ public:
 
 
 //7. Implementation of quick sort algorithm!
+class Solution {
+private:
+    void quickSort(vector<int>& nums, int left, int right){
+        int index = left;
+        int l = left + 1, r = right;
+        //Make sure we will have the return condition here!
+        if(l > r) return;
+        while(l <= r){
+            if(nums[l] > nums[index] && nums[r] < nums[index]){
+                swap(nums[l], nums[r]);
+                l++; r--;
+            }
+            
+            if(nums[l] <= nums[index])
+                l++;
+            
+            if(nums[r] >= nums[index])
+                r--;
+        }
+        swap(nums[index], nums[r]);
+        //we already sort r
+        int mid = r;
+        quickSort(nums, left, mid-1);
+        quickSort(nums, mid+1, right);
+    }
+public:
+    vector<int> sortArray(vector<int>& nums) {
+        int len = nums.size();
+        int l = 0, r = len - 1;
+        quickSort(nums, l, r);
+        return nums;
+    }
+};
+
