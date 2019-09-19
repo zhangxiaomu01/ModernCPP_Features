@@ -392,7 +392,7 @@ public:
 srand (time(NULL));
 
 /* generate secret number between 1 and 10: */
-iSecret = rand() % 10 + 1;
+iSelect = rand() % 10 + 1;
 
 
 //11. Union Find Data structure to solve cycle detection in graph
@@ -535,7 +535,7 @@ int main()
 
 
 //Dijkstra Algorithm!
-https://www.hackerearth.com/zh/practice/algorithms/graphs/shortest-path-algorithms/tutorial/
+//https://www.hackerearth.com/zh/practice/algorithms/graphs/shortest-path-algorithms/tutorial/
 #define SIZE 100000 + 1
 
 vector < pair < int , int > > v [SIZE];   // each vertex has all the connected vertices with the edges weights
