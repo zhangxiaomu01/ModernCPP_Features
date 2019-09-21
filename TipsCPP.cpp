@@ -556,6 +556,9 @@ the vertex with the new distance to the priority queue.
 5. If the popped vertex is visited before, just continue without using it.
 6. Apply the same algorithm again until the priority queue is empty.
 
+Time Complexity of Dijkstra's Algorithm is O(|V|^2), but with min-priority queue
+ it drops down to O(|V| + |E|log|V|).
+
 The following implementation assumes the source node to be 1
 */
 #define SIZE 100000 + 1
@@ -659,5 +662,201 @@ in case |E| = |V|^2 , O(|E|^3) .
             j++;
         }
     }
+
+
+
+//14. Floyd–Warshall's Algorithm
+//https://www.youtube.com/watch?v=LwJdNfdLF9s
+//https://www.hackerearth.com/zh/practice/algorithms/graphs/shortest-path-algorithms/tutorial/
+/*
+Floyd–Warshall's Algorithm is used to find the shortest paths between between 
+all pairs of vertices in a graph, where each edge in the graph has a weight 
+which is positive or negative. The biggest advantage of using this algorithm 
+is that all the shortest distances between any 2 vertices could be calculated 
+in O(|V|^3), where V is the number of vertices in a graph.
+
+The Algorithm Steps:
+
+For a graph with N vertices:
+
+1. Initialize the shortest paths between any 2 vertices with Infinity.
+2. Find all pair shortest paths that use 0 intermediate vertices, then find the 
+shortest paths that use 1 intermediate vertex and so on.. until using all N
+vertices as intermediate nodes.
+3. Minimize the shortest paths between any 2 pairs in the previous operation.
+4. For any 2 vertices (i, j), one should actually minimize the distances between
+this pair using the first K nodes, so the shortest path will be: 
+min(dist[i][K] + dist[K][j], dist[i][j]).
+dist[i][K] represents the shortest path that only uses the first K vertices,
+dist[K][j] represents the shortest path between the pair k, j. As the shortest 
+path will be a concatenation of the shortest path from i to K, then from K to j.
+
+Time Complexity of Floyd–Warshall's Algorithm is O(|V|^3).
+*/
+//path[i][j] record the shortest path between i and j
+for(int k = 1; k <= n; k++){
+    for(int i = 1; i <= n; i++){
+        for(int j = 1; j <= n; j++){
+            dist[i][j] = min( dist[i][j], dist[i][k] + dist[k][j] );
+            path[i][j] = path[k][j];
+        }
+    }
+}
+
+
+//15. Binary Indexed Tree
+//https://www.geeksforgeeks.org/binary-indexed-tree-or-fenwick-tree-2/
+/*
+Representation
+Binary Indexed Tree is represented as an array. Let the array be BITree[]. 
+Each node of the Binary Indexed Tree stores the sum of some elements of the 
+input array. The size of the Binary Indexed Tree is equal to the size of the 
+input array, denoted as n. In the code below, we use a size of n+1 for ease of 
+implementation.
+
+Construction
+We initialize all the values in BITree[] as 0. Then we call update() for all 
+the indexes, the update() operation is discussed below.
+
+Operations:
+getSum(x): Returns the sum of the sub-array arr[0,...,x]
+// Returns the sum of the sub-array arr[0,...,x] using BITree[0..n], which is 
+constructed from arr[0..n-1]
+1) Initialize the output sum as 0, the current index as x+1.
+2) Do following while the current index is greater than 0.
+...a) Add BITree[index] to sum
+...b) Go to the parent of BITree[index].  The parent can be obtained by removing
+     the last set bit from the current index, i.e., 
+     index = index - (index & (-index))
+3) Return sum.
+
+BITree[0] is a dummy node.
+
+BITree[y] is the parent of BITree[x], if and only if y can be obtained by 
+removing the last set bit from the binary representation of x, that is 
+y = x – (x & (-x)).
+
+The child node BITree[x] of the node BITree[y] stores the sum of the elements 
+between y(inclusive) and x(exclusive): arr[y,…,x).
+
+update(x, val): Updates the Binary Indexed Tree (BIT) by performing 
+arr[index] += val
+// Note that the update(x, val) operation will not change arr[]. It only makes 
+changes to BITree[]
+1) Initialize the current index as x+1.
+2) Do the following while the current index is smaller than or equal to n.
+...a) Add the val to BITree[index]
+...b) Go to parent of BITree[index].  The parent can be obtained by incrementing
+     the last set bit of the current index, i.e., 
+     index = index + (index & (-index))
+
+The update function needs to make sure that all the BITree nodes which contain 
+arr[i] within their ranges being updated. We loop over such nodes in the BITree
+ by repeatedly adding the decimal number corresponding to the last set bit of 
+ the current index.
+
+ How does Binary Indexed Tree work?
+The idea is based on the fact that all positive integers can be represented as 
+the sum of powers of 2. For example 19 can be represented as 16 + 2 + 1. Every 
+node of the BITree stores the sum of n elements where n is a power of 2. 
+For example, in the first diagram above (the diagram for getSum()), the sum of
+the first 12 elements can be obtained by the sum of the last 4 elements (from 
+9 to 12) plus the sum of 8 elements (from 1 to 8). The number of set bits in 
+the binary representation of a number n is O(Logn). Therefore, we traverse 
+at-most O(Logn) nodes in both getSum() and update() operations. The time 
+complexity of the construction is O(nLogn) as it calls update() for all n 
+elements.
+
+*/
+// C++ code to demonstrate operations of Binary Index Tree 
+#include <iostream> 
+
+using namespace std; 
+
+/*		 n --> No. of elements present in input array. 
+	BITree[0..n] --> Array that represents Binary Indexed Tree. 
+	arr[0..n-1] --> Input array for which prefix sum is evaluated. */
+
+// Returns sum of arr[0..index]. This function assumes 
+// that the array is preprocessed and partial sums of 
+// array elements are stored in BITree[]. 
+int getSum(int BITree[], int index) 
+{ 
+	int sum = 0; // Iniialize result 
+
+	// index in BITree[] is 1 more than the index in arr[] 
+	index = index + 1; 
+
+	// Traverse ancestors of BITree[index] 
+	while (index>0) 
+	{ 
+		// Add current element of BITree to sum 
+		sum += BITree[index]; 
+
+		// Move index to parent node in getSum View 
+		index -= index & (-index); 
+	} 
+	return sum; 
+} 
+
+// Updates a node in Binary Index Tree (BITree) at given index 
+// in BITree. The given value 'val' is added to BITree[i] and 
+// all of its ancestors in tree. 
+void updateBIT(int BITree[], int n, int index, int val) 
+{ 
+	// index in BITree[] is 1 more than the index in arr[] 
+	index = index + 1; 
+
+	// Traverse all ancestors and add 'val' 
+	while (index <= n) 
+	{ 
+	// Add 'val' to current node of BI Tree 
+	BITree[index] += val; 
+
+	// Actually get next node of BIT, we need to update all the node contains
+    // involves the value from index position
+	index += index & (-index); 
+	} 
+} 
+
+// Constructs and returns a Binary Indexed Tree for given 
+// array of size n. 
+int *constructBITree(int arr[], int n) 
+{ 
+	// Create and initialize BITree[] as 0 
+	int *BITree = new int[n+1]; 
+	for (int i=1; i<=n; i++) 
+		BITree[i] = 0; 
+
+	// Store the actual values in BITree[] using update() 
+	for (int i=0; i<n; i++) 
+		updateBIT(BITree, n, i, arr[i]); 
+
+	// Uncomment below lines to see contents of BITree[] 
+	//for (int i=1; i<=n; i++) 
+	//	 cout << BITree[i] << " "; 
+
+	return BITree; 
+} 
+
+
+// Driver program to test above functions 
+int main() 
+{ 
+	int freq[] = {2, 1, 1, 3, 2, 3, 4, 5, 6, 7, 8, 9}; 
+	int n = sizeof(freq)/sizeof(freq[0]); 
+	int *BITree = constructBITree(freq, n); 
+	cout << "Sum of elements in arr[0..5] is "
+		<< getSum(BITree, 5); 
+
+	// Let use test the update operation 
+	freq[3] += 6; 
+	updateBIT(BITree, n, 3, 6); //Update BIT for above change in arr[] 
+
+	cout << "\nSum of elements in arr[0..5] after update is "
+		<< getSum(BITree, 5); 
+
+	return 0; 
+} 
 
 
