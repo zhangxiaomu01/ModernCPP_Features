@@ -395,6 +395,7 @@ srand (time(NULL));
 iSelect = rand() % 10 + 1;
 
 
+
 //11. Union Find Data structure to solve cycle detection in graph
 // A union by rank and path compression based program to detect cycle in a graph 
 #include <stdio.h> 
@@ -534,8 +535,29 @@ int main()
 
 
 
-//Dijkstra Algorithm!
+//12. Dijkstra Algorithm!
 //https://www.hackerearth.com/zh/practice/algorithms/graphs/shortest-path-algorithms/tutorial/
+/*
+Dijkstra's algorithm has many variants but the most common one is to find the 
+shortest paths from the source vertex to all other vertices in the graph.
+
+Algorithm Steps:
+
+1. Set all vertices distances = infinity except for the source vertex, set the 
+source distance = 0.
+2. Push the source vertex in a min-priority queue in the form (distance , vertex)
+, as the comparison in the min-priority queue will be according to vertices 
+distances.
+3. Pop the vertex with the minimum distance from the priority queue (at first 
+the popped vertex = source).
+4. Update the distances of the connected vertices to the popped vertex in case 
+of "current vertex distance + edge weight < next vertex distance", then push 
+the vertex with the new distance to the priority queue.
+5. If the popped vertex is visited before, just continue without using it.
+6. Apply the same algorithm again until the priority queue is empty.
+
+The following implementation assumes the source node to be 1
+*/
 #define SIZE 100000 + 1
 
 vector < pair < int , int > > v [SIZE];   // each vertex has all the connected vertices with the edges weights
@@ -543,8 +565,8 @@ int dist [SIZE];
 bool vis [SIZE];
 
 void dijkstra(){
-                                                // set the vertices distances as infinity
-    memset(vis, false , sizeof vis);            // set all vertex as unvisited
+    memset(dist, INT_MAX, sizeof(dist));                                            // set the vertices distances as infinity
+    memset(vis, false , sizeof(vis));            // set all vertex as unvisited
     dist[1] = 0;
     multiset < pair < int , int > > s;          // multiset do the job as a min-priority queue
 
@@ -568,4 +590,74 @@ void dijkstra(){
         }
     }
 }
+
+
+
+//13. Bellman Ford Alogirthm
+//https://www.youtube.com/watch?v=-mOEd_3gTK0&t=11s
+//https://www.hackerearth.com/zh/practice/algorithms/graphs/shortest-path-algorithms/tutorial/
+/*
+Bellman Ford's Algorithm:
+Bellman Ford's algorithm is used to find the shortest paths from the source 
+vertex to all other vertices in a weighted graph. It depends on the following 
+concept: Shortest path contains at most  edges, because the shortest path 
+couldn't have a cycle.
+
+So why shortest path shouldn't have a cycle ?
+There is no need to pass a vertex again, because the shortest path to all other 
+vertices could be found without the need for a second visit for any vertices.
+
+Algorithm Steps:
+
+1. The outer loop traverses from  0 - n-1.
+2. Loop over all edges, check if the next node distance > current node distance + 
+edge weight, in this case update the next node distance to "current node 
+distance + edge weight".
+
+This algorithm depends on the relaxation principle where the shortest distance 
+for all vertices is gradually replaced by more accurate values until eventually 
+reaching the optimum solution. In the beginning all vertices have a distance 
+of "Infinity", but only the distance of the source vertex = , then update all 
+the connected vertices with the new distances (source vertex distance + edge 
+weights), then apply the same concept for the new vertices with new distances 
+and so on.
+
+A very important application of Bellman Ford is to check if there is a negative
+cycle in the graph. When we finished the n-1 iteration, we can do one more
+iteration and check whether our shortest path value can still decreasing. If we
+find such path, then there must be a negative cycle!
+
+Time Complexity of Bellman Ford algorithm is relatively high O(|V||E|), 
+in case |E| = |V|^2 , O(|E|^3) .
+*/
+    vector <vector<int>> v [2000 + 10];
+    int dis [1000 + 10];
+
+    for(int i = 0; i < m + 2; i++){
+
+        v[i].clear();
+        dis[i] = 2e9;
+    }
+
+   for(int i = 0; i < m; i++){
+
+        scanf("%d%d%d", &from , &next , &weight);
+
+        v[i].push_back(from);
+        v[i].push_back(next);
+        v[i].push_back(weight);
+   }
+
+    dis[0] = 0;
+    for(int i = 0; i < n - 1; i++){
+        int j = 0;
+        while(v[j].size() != 0){
+
+            if(dis[ v[j][0]  ] + v[j][2] < dis[ v[j][1] ] ){
+                dis[ v[j][1] ] = dis[ v[j][0]  ] + v[j][2];
+            }
+            j++;
+        }
+    }
+
 
