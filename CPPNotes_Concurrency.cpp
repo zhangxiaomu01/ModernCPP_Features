@@ -1,4 +1,5 @@
 #include<iostream>
+#include<fstream>
 #include<vector>
 #include<string>
 #include<list>
@@ -46,6 +47,7 @@ int main() {
 }
 
 
+//**************************************************************************
 //section 2 : Thread Management
 class Fact {
 public:
@@ -112,6 +114,130 @@ int main() {
 }
 
 
-//section 3 : Data Race and Mutex
+//**************************************************************************
+//Section 3 : Data Race and Mutex
+std::mutex mu;
+
+//This will work perfectly for this case, however, if the code between lock() and 
+//unlock() throws an exception, then we will be unable to unlock the mutex!
+//We can use lock_guard to handle the lock and unlock operation!
+/*
+void shared_print(std::string msg, int num) {
+	mu.lock();
+	std::cout << msg << num << std::endl;
+	mu.unlock();
+}
+*/
+
+void shared_print(std::string msg, int num) {
+	//whenever guard goes out of scope, mu will be unlocked!
+	std::lock_guard<std::mutex> guard(mu);
+	//mu.lock();
+	//problem# 2: Now we still have a problem with this code, since cout is a 
+	//global method, other thread could still be possible to directly use it!
+	std::cout << msg << num << std::endl;
+	//mu.unlock();
+}
+
+//Let's handle problem #2
+//We encapsulate the mutex and stream data to class and never expose ofstream to
+//out!
+class logFile {
+private:
+	std::ofstream f;
+	std::mutex m_mutex;
+public:
+	logFile() {
+		f.open("input.txt");
+	}
+	~logFile() {
+		f.close();
+	}
+	//Now all the threads must call shared_print function to output our val
+	void shared_print(std::string id, int val) {
+		std::lock_guard<std::mutex> guard(m_mutex);
+		f << id << " " << val << std::endl;
+	}
+	
+	//Never return common method out of the class
+	std::ofstream& getStream() {
+		return f;
+	}
+	//Never pass ofstream to user provided function!
+	void processf(void fun(std::ostream& f)) {
+		fun(f);
+	}
+
+};
+
+
+void func_01(logFile& logf) {
+	for (int i = 0; i > -100; --i) {
+		logf.shared_print("From t1: ", i);
+	}
+}
+
+//problem# 3, even if we encapsulate the mutex and data in a class, never expose 
+//data outside the class like the above example. It does not guarantee the thread
+//safe! 
+//If we design a stack like before, using the mutex to protect the top() and pop()
+//method.
+class stack {
+private:
+	int* m_array;
+	int m_size;
+	std::mutex m_mutex;
+public:
+	//get the top element of the stack
+	int& top();
+	//pop the top element
+	void pop();
+	//...
+};
+
+void process(int& v) {
+	v = 0;
+}
+
+//suppose that function_02 will be used in 2 threads. Then consider the case
+//stack: [3,2,9,11]. In the first thread, we will get 11, then we go to second
+//thread, and get 11 as well, then in thread 1, we pop 11, then in thread 2, we pop
+//9. Then we process v in thread 1, then in thread 2. You can see we lost 9 
+//permanantly!
+void function_02(stack& st) {
+	int v = st.top();
+	st.pop();
+	process(v);
+}
+
+//Problem#3: we need to handle problem 3 now! The problem is because we separate 
+//top() and pop() method separately, which caused the above problem! We can delete
+//top() method, and let pop() method both get the top element and delete the top
+//element. (It is not exceptional safe, but now it is thread safe!)
+
+/*
+Avoid data racing:
+1. Use the mutex to synchronize the data access
+2. Never leak a handle of file to outside!
+3. Design interface properly!
+*/
+
+int main() {
+	logFile logf;
+	std::thread t1(func_01, std::ref(logf));
+
+	for (int i = 0; i < 100; ++i) {
+		logf.shared_print("From main thread: ", i);
+	}
+
+	if (t1.joinable()) t1.join();
+
+	system("pause");
+	return 0;
+}
+
+
+//**************************************************************************
+//Section 4: Dead lock
 
 
