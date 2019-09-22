@@ -239,5 +239,127 @@ int main() {
 
 //**************************************************************************
 //Section 4: Dead lock
+//A dead lock example!
+class logFile {
+private:
+	std::ofstream f;
+	std::mutex m_mutex;
+	//imagine we will have two mutexes to protect different parts of the data!
+	std::mutex m_mutex_02;
+public:
+	logFile() {
+		f.open("input.txt");
+	}
+	~logFile() {
+		f.close();
+	}
+	//The following two shared_print will cause dead lock!
+	//The first version of shared_print
+	void shared_print(std::string id, int val) {
+		std::lock_guard<std::mutex> guard(m_mutex);
+		std::lock_guard<std::mutex> guard02(m_mutex_02);
+		std::cout << id << " " << val << std::endl;
+	}
+	
+	void shared_print02(std::string id, int val) {
+		//we lock the mutex in different order here! 
+		//Risk of dead locking!
+		std::lock_guard<std::mutex> guard02(m_mutex_02);
+		std::lock_guard<std::mutex> guard(m_mutex);
+		std::cout << id << " " << val << std::endl;
+	}
+
+	//solution 1 to fix above code: make both of the mutex lock in the same order
+	/*
+	void shared_print(std::string id, int val) {
+		std::lock_guard<std::mutex> guard(m_mutex);
+		std::lock_guard<std::mutex> guard02(m_mutex_02);
+		std::cout << id << " " << val << std::endl;
+	}
+
+	void shared_print02(std::string id, int val) {
+		std::lock_guard<std::mutex> guard(m_mutex);
+		std::lock_guard<std::mutex> guard02(m_mutex_02);
+		std::cout << id << " " << val << std::endl;
+	}
+	*/
+
+	//solution 2: using std::lock function! The reason why it works is the same as
+	//solution 1.
+	/*
+	void shared_print(std::string id, int val) {
+		//std::lock defines the algorithm to lock the mutex while preventing 
+		//potential deadlock
+		std::lock(m_mutex, m_mutex_02);
+		//std::adopt_lock tell the guard that mutex has already been locked, guard
+		//only needs to handle unlock situation!
+		std::lock_guard<std::mutex> guard(m_mutex, std::adopt_lock);
+		std::lock_guard<std::mutex> guard02(m_mutex_02, std::adopt_lock);
+		std::cout << id << " " << val << std::endl;
+	}
+
+	void shared_print02(std::string id, int val) {
+		std::lock(m_mutex, m_mutex_02);
+		std::lock_guard<std::mutex> guard(m_mutex, std::adopt_lock);
+		std::lock_guard<std::mutex> guard02(m_mutex_02, std::adopt_lock);
+		std::cout << id << " " << val << std::endl;
+	}
+	*/
+	
+};
+
+//call the original shared_print function!
+void func_01(logFile& logf) {
+	for (int i = 0; i > -100; --i) {
+		logf.shared_print("From t1: ", i);
+	}
+}
+
+
+/*
+Principles to avoid deadlock:
+1. Prefer locking single mutex at a time!
+
+2. Avoid locking a single mutex and calling a user provided funtion!
+e.g. 
+{
+	std::lock_guard<std::mutex> guard(mu);
+	user_function(); //No!
+}
+The reason is that user function may lock other mutex or even lock the same mutex
+again!
+
+3. Using std::lock() method to lock multiple mutexes if you really want to!
+
+4. When std::lock() is impossible, try to lock the mutexes in the same order for all
+threads!
+
+Locking Granularity!
+- Fine-grained lock: protects the small amount of data!
+- Coarse-grained lock: protects the large amount of data!
+*/
+
+
+int main() {
+	logFile logf;
+	std::thread t1(func_01, std::ref(logf));
+
+	//call the shared_print02 here
+	for (int i = 0; i < 100; ++i) {
+		logf.shared_print02("From main thread: ", i);
+	}
+
+	if (t1.joinable()) t1.join();
+
+	system("pause");
+	return 0;
+}
+
+
+
+//**************************************************************************
+//Section 5: Unique lock and lazy initialization
+
+
 
 
