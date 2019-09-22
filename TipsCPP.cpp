@@ -1385,7 +1385,435 @@ Node *root = NULL;
 
 
 
+// 17. Minimum Spanning Tree (Kruskal's Algorithm)
+/*
+What is Minimum Spanning Tree?
+Given a connected and undirected graph, a spanning tree of that graph is a 
+subgraph that is a tree and connects all the vertices together. A single graph 
+can have many different spanning trees. A minimum spanning tree (MST) or 
+minimum weight spanning tree for a weighted, connected and undirected graph 
+is a spanning tree with weight less than or equal to the weight of every other 
+spanning tree. The weight of a spanning tree is the sum of weights given to 
+each edge of the spanning tree.
+
+How many edges does a minimum spanning tree has?
+A minimum spanning tree has (|V| – 1) edges where V is the number of vertices in 
+the given graph.
+
+Below are the steps for finding MST using Kruskal’s algorithm
+1. Sort all the edges in non-decreasing order of their weight.
+2. Pick the smallest edge. Check if it forms a cycle with the spanning tree 
+formed so far. If cycle is not formed, include this edge. Else, discard it.
+The step#2 uses Union-Find algorithm to detect cycle.
+3. Repeat step#2 until there are (V-1) edges in the spanning tree.
+
+Time Complexity: O(ElogE) or O(ElogV). Sorting of edges takes O(ELogE) time. 
+After sorting, we iterate through all edges and apply find-union algorithm. 
+The find and union operations can take atmost O(LogV) time. So overall 
+complexity is O(ELogE + ELogV) time. The value of E can be atmost O(V2), 
+so O(LogV) are O(LogE) same. Therefore, overall time complexity is O(ElogE) 
+or O(ElogV).
+
+*/
+// C++ program for Kruskal's algorithm to find Minimum Spanning Tree 
+// of a given connected, undirected and weighted graph 
+using namespace std; 
+
+// a structure to represent a weighted edge in graph 
+class Edge 
+{ 
+	public: 
+	int src, dest, weight; 
+}; 
+
+// a structure to represent a connected, undirected 
+// and weighted graph 
+class Graph 
+{ 
+	public: 
+	// V-> Number of vertices, E-> Number of edges 
+	int V, E; 
+
+	// graph is represented as an array of edges. 
+	// Since the graph is undirected, the edge 
+	// from src to dest is also edge from dest 
+	// to src. Both are counted as 1 edge here. 
+	Edge* edge; 
+}; 
+
+// Creates a graph with V vertices and E edges 
+Graph* createGraph(int V, int E) 
+{ 
+	Graph* graph = new Graph; 
+	graph->V = V; 
+	graph->E = E; 
+
+	graph->edge = new Edge[E]; 
+
+	return graph; 
+} 
+
+// A structure to represent a subset for union-find 
+class subset 
+{ 
+	public: 
+	int parent; 
+	int rank; 
+}; 
+
+// A utility function to find set of an element i 
+// (uses path compression technique) 
+int find(subset subsets[], int i) 
+{ 
+	// find root and make root as parent of i 
+	// (path compression) 
+	if (subsets[i].parent != i) 
+		subsets[i].parent = find(subsets, subsets[i].parent); 
+
+	return subsets[i].parent; 
+} 
+
+// A function that does union of two sets of x and y 
+// (uses union by rank) 
+void Union(subset subsets[], int x, int y) 
+{ 
+	int xroot = find(subsets, x); 
+	int yroot = find(subsets, y); 
+
+	// Attach smaller rank tree under root of high 
+	// rank tree (Union by Rank) 
+	if (subsets[xroot].rank < subsets[yroot].rank) 
+		subsets[xroot].parent = yroot; 
+	else if (subsets[xroot].rank > subsets[yroot].rank) 
+		subsets[yroot].parent = xroot; 
+
+	// If ranks are same, then make one as root and 
+	// increment its rank by one 
+	else
+	{ 
+		subsets[yroot].parent = xroot; 
+		subsets[xroot].rank++; 
+	} 
+} 
+
+// Compare two edges according to their weights. 
+// Used in qsort() for sorting an array of edges 
+int myComp(const void* a, const void* b) 
+{ 
+	Edge* a1 = (Edge*)a; 
+	Edge* b1 = (Edge*)b; 
+	return a1->weight > b1->weight; 
+} 
+
+// The main function to construct MST using Kruskal's algorithm 
+void KruskalMST(Graph* graph) 
+{ 
+	int V = graph->V; 
+	Edge result[V]; // Tnis will store the resultant MST 
+	int e = 0; // An index variable, used for result[] 
+	int i = 0; // An index variable, used for sorted edges 
+
+	// Step 1: Sort all the edges in non-decreasing 
+	// order of their weight. If we are not allowed to 
+	// change the given graph, we can create a copy of 
+	// array of edges 
+	qsort(graph->edge, graph->E, sizeof(graph->edge[0]), myComp); 
+
+	// Allocate memory for creating V ssubsets 
+	subset *subsets = new subset[( V * sizeof(subset) )]; 
+
+	// Create V subsets with single elements 
+	for (int v = 0; v < V; ++v) 
+	{ 
+		subsets[v].parent = v; 
+		subsets[v].rank = 0; 
+	} 
+
+	// Number of edges to be taken is equal to V-1 
+	while (e < V - 1 && i < graph->E) 
+	{ 
+		// Step 2: Pick the smallest edge. And increment 
+		// the index for next iteration 
+		Edge next_edge = graph->edge[i++]; 
+
+		int x = find(subsets, next_edge.src); 
+		int y = find(subsets, next_edge.dest); 
+
+		// If including this edge does't cause cycle, 
+		// include it in result and increment the index 
+		// of result for next edge 
+		if (x != y) 
+		{ 
+			result[e++] = next_edge; 
+			Union(subsets, x, y); 
+		} 
+		// Else discard the next_edge 
+	} 
+
+	// print the contents of result[] to display the 
+	// built MST 
+	cout<<"Following are the edges in the constructed MST\n"; 
+	for (i = 0; i < e; ++i) 
+		cout<<result[i].src<<" -- "<<result[i].dest<<" == "<<result[i].weight<<endl; 
+	return; 
+} 
+
+// Driver code 
+int main() 
+{ 
+	/* Let us create following weighted graph 
+			10 
+		0--------1 
+		| \ | 
+	6| 5\ |15 
+		| \ | 
+		2--------3 
+			4 */
+	int V = 4; // Number of vertices in graph 
+	int E = 5; // Number of edges in graph 
+	Graph* graph = createGraph(V, E); 
 
 
+	// add edge 0-1 
+	graph->edge[0].src = 0; 
+	graph->edge[0].dest = 1; 
+	graph->edge[0].weight = 10; 
 
+	// add edge 0-2 
+	graph->edge[1].src = 0; 
+	graph->edge[1].dest = 2; 
+	graph->edge[1].weight = 6; 
+
+	// add edge 0-3 
+	graph->edge[2].src = 0; 
+	graph->edge[2].dest = 3; 
+	graph->edge[2].weight = 5; 
+
+	// add edge 1-3 
+	graph->edge[3].src = 1; 
+	graph->edge[3].dest = 3; 
+	graph->edge[3].weight = 15; 
+
+	// add edge 2-3 
+	graph->edge[4].src = 2; 
+	graph->edge[4].dest = 3; 
+	graph->edge[4].weight = 4; 
+
+	KruskalMST(graph); 
+
+	return 0; 
+} 
+
+
+// 18. Binary Heap
+/*
+A Binary Heap is a Binary Tree with following properties.
+1) It’s a complete tree (All levels are completely filled except possibly the 
+last level and the last level has all keys as left as possible). This property 
+of Binary Heap makes them suitable to be stored in an array.
+
+2) A Binary Heap is either Min Heap or Max Heap. In a Min Binary Heap, the key 
+at root must be minimum among all keys present in Binary Heap. The same 
+property must be recursively true for all nodes in Binary Tree. Max Binary 
+Heap is similar to MinHeap.
+
+How is Binary Heap represented?
+A Binary Heap is a Complete Binary Tree. A binary heap is typically represented as an array.
+
+The root element will be at Arr[0].
+Below table shows indexes of other nodes for the ith node, i.e., Arr[i]:
+Arr[(i-1)/2]	Returns the parent node
+Arr[(2*i)+1]	Returns the left child node
+Arr[(2*i)+2]	Returns the right child node
+The traversal method use to achieve Array representation is Level Order.
+
+Operations on Min Heap:
+1) getMini(): It returns the root element of Min Heap. Time Complexity of this 
+operation is O(1).
+
+2) extractMin(): Removes the minimum element from MinHeap. Time Complexity of 
+this Operation is O(Logn) as this operation needs to maintain the heap 
+property (by calling heapify()) after removing root.
+
+3) decreaseKey(): Decreases value of key. The time complexity of this 
+operation is O(Logn). If the decreases key value of a node is greater than 
+the parent of the node, then we don’t need to do anything. Otherwise, we need 
+to traverse up to fix the violated heap property.
+
+4) insert(): Inserting a new key takes O(Logn) time. We add a new key at the 
+end of the tree. IF new key is greater than its parent, then we don’t need to 
+do anything. Otherwise, we need to traverse up to fix the violated heap 
+property.
+
+5) delete(): Deleting a key also takes O(Logn) time. We replace the key to be 
+deleted with minum infinite by calling decreaseKey(). After decreaseKey(), the 
+minus infinite value must reach root, so we call extractMin() to remove the key.
+
+*/
+// A C++ program to demonstrate common Binary Heap Operations 
+#include<iostream> 
+#include<climits> 
+using namespace std; 
+
+// Prototype of a utility function to swap two integers 
+void swap(int *x, int *y); 
+
+// A class for Min Heap 
+class MinHeap 
+{ 
+	int *harr; // pointer to array of elements in heap 
+	int capacity; // maximum possible size of min heap 
+	int heap_size; // Current number of elements in min heap 
+public: 
+	// Constructor 
+	MinHeap(int capacity); 
+
+	// to heapify a subtree with the root at given index 
+	void MinHeapify(int ); 
+
+	int parent(int i) { return (i-1)/2; } 
+
+	// to get index of left child of node at index i 
+	int left(int i) { return (2*i + 1); } 
+
+	// to get index of right child of node at index i 
+	int right(int i) { return (2*i + 2); } 
+
+	// to extract the root which is the minimum element 
+	int extractMin(); 
+
+	// Decreases key value of key at index i to new_val 
+	void decreaseKey(int i, int new_val); 
+
+	// Returns the minimum key (key at root) from min heap 
+	int getMin() { return harr[0]; } 
+
+	// Deletes a key stored at index i 
+	void deleteKey(int i); 
+
+	// Inserts a new key 'k' 
+	void insertKey(int k); 
+}; 
+
+// Constructor: Builds a heap from a given array a[] of given size 
+MinHeap::MinHeap(int cap) 
+{ 
+	heap_size = 0; 
+	capacity = cap; 
+	harr = new int[cap]; 
+} 
+
+// Inserts a new key 'k' 
+void MinHeap::insertKey(int k) 
+{ 
+	if (heap_size == capacity) 
+	{ 
+		cout << "\nOverflow: Could not insertKey\n"; 
+		return; 
+	} 
+
+	// First insert the new key at the end 
+	heap_size++; 
+	int i = heap_size - 1; 
+	harr[i] = k; 
+
+	// Fix the min heap property if it is violated 
+	while (i != 0 && harr[parent(i)] > harr[i]) 
+	{ 
+        swap(&harr[i], &harr[parent(i)]); 
+        i = parent(i); 
+	} 
+} 
+
+// Decreases value of key at index 'i' to new_val. It is assumed that 
+// new_val is smaller than harr[i]. 
+void MinHeap::decreaseKey(int i, int new_val) 
+{ 
+	harr[i] = new_val; 
+	while (i != 0 && harr[parent(i)] > harr[i]) 
+	{ 
+        swap(&harr[i], &harr[parent(i)]); 
+        i = parent(i); 
+	} 
+} 
+
+// Method to remove minimum element (or root) from min heap 
+int MinHeap::extractMin() 
+{ 
+	if (heap_size <= 0) 
+		return INT_MAX; 
+	if (heap_size == 1) 
+	{ 
+		heap_size--; 
+		return harr[0]; 
+	} 
+
+	// Store the minimum value, and remove it from heap 
+	int root = harr[0]; 
+	harr[0] = harr[heap_size-1]; 
+	heap_size--; 
+	MinHeapify(0); 
+
+	return root; 
+} 
+
+
+// This function deletes key at index i. It first reduced value to minus 
+// infinite, then calls extractMin() 
+void MinHeap::deleteKey(int i) 
+{ 
+	decreaseKey(i, INT_MIN); 
+	extractMin(); 
+} 
+
+// A recursive method to heapify a subtree with the root at given index 
+// This method assumes that the subtrees are already heapified 
+void MinHeap::MinHeapify(int i) 
+{ 
+	int l = left(i); 
+	int r = right(i); 
+	int smallest = i; 
+	if (l < heap_size && harr[l] < harr[i]) 
+		smallest = l; 
+	if (r < heap_size && harr[r] < harr[smallest]) 
+		smallest = r; 
+	if (smallest != i) 
+	{ 
+		swap(&harr[i], &harr[smallest]); 
+		MinHeapify(smallest); 
+	} 
+} 
+
+// A utility function to swap two elements 
+void swap(int *x, int *y) 
+{ 
+	int temp = *x; 
+	*x = *y; 
+	*y = temp; 
+} 
+
+// Driver program to test above functions 
+int main() 
+{ 
+	MinHeap h(11); 
+	h.insertKey(3); 
+	h.insertKey(2); 
+	h.deleteKey(1); 
+	h.insertKey(15); 
+	h.insertKey(5); 
+	h.insertKey(4); 
+	h.insertKey(45); 
+	cout << h.extractMin() << " "; 
+	cout << h.getMin() << " "; 
+	h.decreaseKey(2, 1); 
+	cout << h.getMin(); 
+	return 0; 
+} 
+
+
+// 19. Prim's MST algorithm
+/*
+
+
+*/
 
