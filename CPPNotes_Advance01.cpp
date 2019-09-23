@@ -99,5 +99,49 @@ int main() {
 
 
 
+//*********************************************************************//
+//Section 3: Logic Constness and Bitwise Constness
+// The idea of "bitwise constness", which basically means that a const class should 
+// have exactly the same representation in memory at all times.
+class BigArray {
+	std::vector<int> v; //huge array
+	//making a variable to be mutable, then we can change it in a const function!
+	//preferred!
+	mutable int accessCounter;
+public:
+	//The getItem() should be a const function
+	int getItem(int index) const {
+		accessCounter++;
+		return v[index];
+	}
+};
+
+
+class BigArray01 {
+	std::vector<int> v; //huge array
+	//If we do not want to add mutable here!
+	int accessCounter;
+	int* v2; //another huge array!
+public:
+	//The getItem() should be a const function
+	int getItem(int index) const {
+		//also work. However, in general, we should avoid cast!.
+		const_cast<BigArray01*>(this)->accessCounter++;
+		return v[index];
+	}
+	//compile will accept this as const, because the value of pointer v2 does not 
+	//change (address)
+	void setValue(int index, int val) const {
+		*(v2 + index) = val;
+	}
+};
+
+int main() {
+	BigArray b;
+
+	system("pause");
+	return 0;
+}
+
 
 
