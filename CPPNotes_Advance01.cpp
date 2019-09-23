@@ -50,6 +50,52 @@ int main() {
 
 //*********************************************************************//
 //Section 2: const and functions
+//const used with function!
+class Dog {
+	int age;
+	std::string name;
+public:
+	Dog() { age = 1; name = "Dummy"; }
+	//const parameters
+	//Only meaningful when we pass by reference (instead of by value!)
+	void setAge(const int& a) { age = a; }
+
+	//const return value! caller cannot change name!
+	//Only meaningful when we return by reference (instead of by value!)
+	const std::string& getName() { return name; }
+
+	//const function!
+	//This function will never modify any member variables of this class!!
+	void printName() const { std::cout << name << "Const" << std::endl; }
+
+	//The next code won't work, const function can only call const function!
+	//void printName() const { std::cout << getName() << std::endl; }
+
+	//we can overload the function by constness! When our object is const, it will
+	//call const version of printName(); else it will call the following version!
+	void printName() { std::cout << name << "Non-Const" << std::endl; }
+};
+
+
+int main() {
+	Dog d;
+	const Dog d2;
+	int i = 9;
+	d.setAge(i);
+
+	const std::string dogName = d.getName();
+
+	//will call non-const version of printName()
+	d.printName();
+	//will call const version of printName()
+	d2.printName();
+
+	std::cout << dogName << std::endl;
+
+	system("pause");
+	return 0;
+}
+
 
 
 
