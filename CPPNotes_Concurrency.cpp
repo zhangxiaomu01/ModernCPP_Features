@@ -657,3 +657,126 @@ int main() {
 }
 
 
+
+
+//**************************************************************************
+//Section 8: Using Callable Objects
+class A {
+public:
+	int g(double x) { return 0; }
+	void f(int x, char c){}
+	int operator()(int N) { return 0; }
+};
+
+void foo(int x){}
+
+int main() {
+	A a;
+	std::thread t1(a, 6); // copy of a in a different thread!
+	std::thread t2(std::ref(a), 6); //ref of a in a different thread!
+	std::thread t3(A(), 6);//temperary A moved to a different thread!
+	std::thread t4([](int x) {return x * x; }, 7); //lambda function in a different thread!
+	std::thread t5(foo, 7); //foo in a different thread!
+	
+	//member function!
+	std::thread t6(&A::f, a, 1, 'l'); //copy of a.f(1, 'l') in a different thread!
+	std::thread t7(&A::f, &a, 1, 'l'); //a.f(1, 'l') in a different thread!
+
+	std::thread t8(std::move(a), 6); //we can no longer use a in main thread!
+
+	//The above rules also apply to std::bind() / std::call_once() / std::async() 
+	//function!
+
+	system("pause");
+	return 0;
+}
+
+
+
+//**************************************************************************
+//Section 9: Packaged Task
+int factorial(int N) {
+	int res = 1;
+	for (int i = N; i > 1; --i) {
+		res *= i;
+	}
+	std::cout << "The res from child thread: " << res << std::endl;
+	return res;
+}
+
+//taskQ shared between main thread and task thread!
+std::queue<std::packaged_task<int()>> taskQ;
+std::mutex g_mu;
+std::condition_variable g_cond;
+
+void thread_01() {
+	std::packaged_task<int()> t;
+	{
+		std::unique_lock<std::mutex> locker(g_mu);
+		g_cond.wait(locker, [](){return !taskQ.empty(); });
+		t = std::move(taskQ.front());
+		taskQ.pop();
+	}
+	
+	t();
+}
+
+/* Summary
+3 ways to get a future:
+- promis::get_future();
+- packaged_task::get_future();
+- async() returns a future
+*/
+
+
+int main() {
+	//we can directly pass the variable here!
+	std::thread t1(factorial, 8);
+	t1.join();
+
+	//can execute later in other context! (e.g. other thread!)
+	std::packaged_task<int(int)> task(factorial);
+
+	//we can execute the task by
+	task(4);
+
+	//for packaged task, we have to use std::bind() function to do the job!
+	//std::bind() will create a function object and pass to packaged_task 
+	//constructor. Since we have binded the parameter, we cannot have (int) here
+	std::packaged_task<int()> task_02(std::bind(factorial, 5));
+	//when execute the task, we just call task_02() without any parameter!
+	task_02();
+
+	//We can also just define a function object and execute it later
+	auto t = std::bind(factorial, 6);
+	t();
+
+
+	//We execute our packaged task in taskThread
+	std::thread taskThread(thread_01);
+
+	std::packaged_task<int()> task_03(std::bind(factorial, 3));
+	//in order to get the return value of task_03 in main thread in the future!
+	std::future<int> fu = task_03.get_future();
+	//Then why we need a packaged_task? The main advantage for packaged_task is it
+	//can link a callable object to a future 
+	//wait for someone to execute the task_02
+	std::unique_lock<std::mutex> uLocker(g_mu);
+	//I don't understand why push(task_03) won't work here, only move(task_03) works
+	taskQ.push(std::move(task_03));
+	uLocker.unlock();
+	g_cond.notify_one();
+
+	std::cout << fu.get() << std::endl;
+
+	//join the thread!
+	taskThread.join();
+	
+	system("pause");
+	return 0;
+}
+
+
+
+//**************************************************************************
+//Section 10: Time Constrain
