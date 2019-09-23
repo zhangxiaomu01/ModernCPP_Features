@@ -780,3 +780,55 @@ int main() {
 
 //**************************************************************************
 //Section 10: Time Constrain
+int factorial(int N) {
+	int res = 1;
+	for (int i = N; i > 1; --i) {
+		res *= i;
+	}
+	std::cout << "The res from child thread: " << res << std::endl;
+	return res;
+}
+
+int main() {
+	/* thread */
+	std::thread t1(factorial, 5);
+	std::this_thread::sleep_for(std::chrono::milliseconds(300));
+	std::chrono::steady_clock::time_point tp = std::chrono::steady_clock::now() + std::chrono::milliseconds(5);
+	std::this_thread::sleep_until(tp);
+
+
+	/* mutex */
+	std::mutex mu;
+	std::lock_guard<std::mutex> locker(mu);
+	std::unique_lock<std::mutex> uLocker(mu);
+	uLocker.try_lock();
+	//if 200 milliseconds passed, mutex still cannot be locked. Function will return
+	uLocker.try_lock_for(std::chrono::milliseconds(200));
+	uLocker.try_lock_until(tp);
+
+
+	/* condition varibale */
+	std::condition_variable cond;
+	cond.wait_for(uLocker, std::chrono::milliseconds(200));
+	cond.wait_until(uLocker, tp);
+
+
+	/* future and promise */
+	std::promise<int> p;
+	std::future<int> fu = p.get_future();
+	fu.get();
+	fu.wait();
+	fu.wait_for(std::chrono::milliseconds(200));
+	fu.wait_until(tp);
+
+	/* async() */
+	std::future<int> f = std::async(factorial, 6);
+
+	/* packaged task */
+	std::packaged_task<int(int)> t(factorial);
+	std::future<int> f2 = t.get_future();
+	t(7);
+
+	system("pause");
+	return 0;
+}
