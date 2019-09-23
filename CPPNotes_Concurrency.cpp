@@ -3,8 +3,10 @@
 #include<vector>
 #include<string>
 #include<list>
+#include<queue>
 #include<thread>
 #include<mutex>
+#include<future>
 
 //section 1
 void function_1() {
@@ -359,7 +361,299 @@ int main() {
 
 //**************************************************************************
 //Section 5: Unique lock and lazy initialization
+//Unique lock and lazy initialization
+class logFile {
+private:
+	std::ofstream f;
+	std::mutex m_mutex;
+
+public:
+	logFile() {
+		f.open("input.txt");
+	}
+	~logFile() {
+		f.close();
+	}
+
+	void shared_print(std::string id, int val) {
+		//std::lock_guard<std::mutex> guard(m_mutex);
+
+		//std::unique_lock<mutex> is more flexible compared with std::lock_guard
+		//You can defer lock, lock and unlock multiple times if using unique_lock
+		//It's more expensive compared with lock_guard<mutex>, if there is no need
+		//for the flexibility, lock_guard preferred!
+		std::unique_lock<std::mutex> uLocker(m_mutex);
+
+		//We can even defer the lock operation for later use
+		//std::unique_lock<std::mutex> uLocker02(m_mutex, std::defer_lock);
+
+		//unique_lock can be moved, by moving one unique_lock to another, we are 
+		//actually transferring the ownership of the mutex from one lock to another.
+		//We cannot even move (no copy) lock_guard! 
+		//std::unique_lock<std::mutex> uLocker03 = std::move(uLocker);
+
+		std::cout << id << " " << val << std::endl;
+		uLocker.unlock();
+		//...Other staff... no need for lock
+		uLocker.lock();
+		//...Staff need the lock...
+	}
+};
+
+class logFile01 {
+private:
+	std::ofstream f;
+	std::mutex m_mutex;
+	std::mutex m_mutexOpenFile;
+	std::once_flag m_flag;
+
+public:
+	logFile01() {
+		//We do not want to open it right now if our shared_print() method not even
+		//called! We can move the function to our shared_print() method!
+		//f.open("input.txt");
+	}
+	~logFile01() {
+		if(f.is_open())
+			f.close();
+	}
+
+	void shared_print(std::string id, int val) {
+		//Not thread safe now! We only need the file to be opened once!
+		//Lazy initialization. Initialization uppon first use idiom!
+		//if(!f.is_open())
+		//	f.open("input.txt");
+
+		//Solution 1: make open file thread safe! 
+		//This solution is not good because every time when we call shared_print, we
+		//need to lock the m_mutexOpenFile mutex. Since we already know that we only
+		//need to open the file once! It's too much overhead!
+		//{
+		//	//We have to put !f.is_open() in this mutex, or it will still not be
+		//	//thread safe!
+		//	std::unique_lock<std::mutex> uLockerFile(m_mutexOpenFile);
+		//	if (!f.is_open())
+		//		//Only put locker here will still not be thread safe!
+		//		//std::unique_lock<std::mutex> uLockerFile(m_mutexOpenFile);
+		//		f.open("input.txt");
+		//}
+
+		//Solution 2: using STL once_flag! 
+		//& - capture f by reference! 
+		//Preferred
+		std::call_once(m_flag, [&]() { f.open("input.txt"); });
+
+		std::unique_lock<std::mutex> uLocker(m_mutex);
+		f << id << " " << val << std::endl;
+	}
+};
+
+//call the original shared_print function!
+void func_01(logFile& logf) {
+	for (int i = 0; i > -100; --i) {
+		logf.shared_print("From t1: ", i);
+	}
+}
 
 
+int main() {
+	logFile logf;
+	std::thread t1(func_01, std::ref(logf));
+
+	//call the shared_print02 here
+	for (int i = 0; i < 100; ++i) {
+		logf.shared_print("From main thread: ", i);
+	}
+
+	if (t1.joinable()) t1.join();
+
+	system("pause");
+	return 0;
+}
+
+
+
+//**************************************************************************
+//Section 6: Condition variables!
+std::mutex g_mu;
+std::queue<int> g_queue;
+std::condition_variable g_Con;
+
+void producer() {
+	int  i = 10;
+	while (i >= 0) {
+		std::unique_lock<std::mutex> locker(g_mu);
+		g_queue.push(i * 10);
+		//we need to unlock first before notify other thread(s)
+		locker.unlock();
+		//notify one thread waiting for the unique_lock
+		//we can use notify_all to awake all the threads waiting for the unique_lock
+		g_Con.notify_one();
+		//sleep for 0.2 seconds!
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
+		i--;
+	}
+	
+}
+
+void consumer() {
+	int var = 12;
+	while (var != 0) {
+		std::unique_lock<std::mutex> locker(g_mu);
+		// When thread consumer goes to sleep, it should release the locker
+		// first. 
+		//g_Con.wait(locker); //spurious wake!
+		//if the thread 2 wakes up and finds that queue is empty, then it will go to
+		//sleep again! It will continue when queue is not empty!
+		g_Con.wait(locker, []() {return !g_queue.empty(); });
+		var = g_queue.front();
+		g_queue.pop();
+		locker.unlock();
+		std::cout << "consumer consumes data from producer: " << var << std::endl;
+	}
+}
+
+
+int main() {
+	std::thread t1(producer);
+	std::thread t2(consumer);
+
+	t1.join();
+	t2.join();
+	system("pause");
+	return 0;
+}
+
+
+
+//**************************************************************************
+//Section 7: Future and Promise!
+std::mutex mu;
+
+/*
+Calculate factorial in child thread works perfectly here. However, imagine if we 
+want to get the result from child, we need to define a shared variable from main
+thread and pass it as a reference to factorial! In order to prevent data racing,
+we also need to define mutex and condition variable to handle synchronization! 
+Which is over complicated for this simple demand! We will discuss asych() method 
+to handle the situation!
+*/
+void factorial(int N) {
+	int res = 1;
+	for (int i = N; i > 1; --i) {
+		res *= i;
+	}
+	std::cout << "The res from child thread: " << res << std::endl;
+}
+
+int factorial_01(int N) {
+	int res = 1;
+	for (int i = N; i > 1; --i) {
+		res *= i;
+	}
+	std::cout << "The res from child thread: " << res << std::endl;
+	return res;
+}
+
+//We need to pass the future as a reference in order to get the promise 
+//from main thread in the future!
+int factorial_02(std::future<int>& f) {
+	int res = 1;
+	int N = f.get();//exception: std::future_errc::broken_promise
+	for (int i = N; i > 1; --i) {
+		res *= i;
+	}
+	std::cout << "The res from child thread: " << res << std::endl;
+	return res;
+}
+
+int factorial_03(std::shared_future<int> f) {
+	std::lock_guard<std::mutex> locker(mu);
+	int res = 1;
+	int N = f.get();//exception: std::future_errc::broken_promise
+	for (int i = N; i > 1; --i) {
+		res *= i;
+	}
+	std::cout << "The res from sf thread: " << res << std::endl;
+	return res;
+}
+
+int main() {
+	//works perfectly
+	//std::thread t1(factorial, 4);
+	//t1.join();
+
+	//If we want to get result from child thread!
+	//future class wrapper the result that we can get in the future!
+	//This may or may not create a child thread to do the calculation. We can use 
+	//the flag to control whether we want a new thread!
+	std::future<int> fu = std::async(factorial_01, 4);
+
+	//when std::launch::deferred flag is set, we actually deferred execution of
+	//factorial_01 until we can fu.get() method! We will not create new threads and
+	//factorial will be calculated in the main thread!
+	//std::future<int> fu = std::async(std::launch::deferred,factorial_01, 4);
+
+	//when std::launch::async flag is set, we create a new thread and calculate the
+	//result
+	//std::future<int> fu = std::async(std::launch::async, factorial_01, 4);
+
+	//When combined together, it depends on the implementation to decide whether to
+	//create a new thread! This is the default behavior of std::async()
+	//std::future<int> fu = std::async(std::launch::async | std::launch::deferred, factorial_01, 4);
+
+
+	//get the result from factorial function (need a return value for factorial
+	//function)
+	//For each future, we can only call the get() method once
+	int x = fu.get();
+	std::cout << "Print result from main thread: " << x << std::endl;
+
+	//************************************************************************//
+	//We can also use future to pass the value from parent thread to child thread!
+	//a promise is made that in some future, we will provide the a value to child
+	//thread! 
+	std::promise<int> p;
+	std::future<int> fu_01 = p.get_future();
+	std::future<int> fu_02 = std::async(std::launch::async, factorial_02, std::ref(fu_01));
+
+	//do something else
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	//We pass our promise with a value! If we forget to keep our promise, we will 
+	//have an exception of std::future_errc::broken_promise
+	p.set_value(4);
+	//We can set an expection if we know we cannot pass the value to the promise
+	//p.set_exception(std::make_exception_ptr(std::runtime_error("Broken promise!")));
+
+
+	int res_01 = fu_02.get();
+	std::cout << "Print result from future 02: " << res_01 << std::endl;
+
+	//Just like thread, neighther promise or future can be copied, only can be moved!
+	std::promise<int> p2 = std::move(p);
+
+	
+	//************************************************************************//
+	//shared_future! If we want to launch the factorial function many times by many
+	//threads! If we stick to future, then we have to created multiple future 
+	//objects. Instead, we can pass the shared_future (can be copied to) to multiple
+	//threads!
+	std::promise<int> pk;
+	std::future<int> cfu = pk.get_future();
+	std::shared_future<int> sf = cfu.share();
+
+	//Note we pass a copy of sf to all the factorial_03
+	std::future<int> f_01 = std::async(std::launch::async, factorial_03, sf);
+	std::future<int> f_02 = std::async(std::launch::async, factorial_03, sf);
+	std::future<int> f_03 = std::async(std::launch::async, factorial_03, sf);
+
+	std::this_thread::sleep_for(std::chrono::milliseconds(200));
+	//now we have synchronization issue, with std::cout. We fix that using mutex!
+	pk.set_value(5);
+
+
+	system("pause");
+	return 0;
+}
 
 
