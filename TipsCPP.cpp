@@ -1973,3 +1973,14 @@ int main()
 } 
 
 
+// 20. Extract information from string
+stringstream ss(data);
+vector<int> val;
+while(ss){
+	string s;
+	ss >> s;
+	if(!s.empty()){
+		int num = stoi(s);
+		val.push_back(num);
+	}
+}
