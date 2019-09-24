@@ -2,6 +2,13 @@
 #include<functional> //std::hash<T> 
 #include<unordered_set>
 #include<utility>
+
+//The following lambda function won't work as a hash function!
+/*
+auto hasher = [](pair<char, int>& p){
+	return hash<string>()(to_string(p.second)+ '_' + p.first);
+};
+*/
 struct Hash{
      size_t operator()(const pair<int, int>& p) const{
          //hash<long long>() create a hash() variable with default constructor
