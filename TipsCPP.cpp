@@ -12,6 +12,10 @@ struct Hash{
 std::unordered_set<std::pair<int, int>, Hash> uSet;
 
 
+//1.1 for_each function along with lambda function:
+auto toLowerC = [](char& c){ c = tolower(c); };
+for_each(s.begin(), s.end(), toLowerC);
+
 
 //2. std::priority_queue is the max queue, which the top element is the largest
 
