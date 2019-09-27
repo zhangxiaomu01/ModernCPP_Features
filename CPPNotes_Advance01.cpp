@@ -264,3 +264,54 @@ private:
 		std::cout << "File destroyed!" << std::endl;
 	}
 };
+
+
+
+//*********************************************************************//
+//Section 6: Virtual Destructor
+/*
+Note: For classes from standard template library, most of them do not have 
+virtual keyword for destructors. Be careful if you want to inheritate from
+these classes. Better to use shared_ptr for derived class if you have to do
+such inheritance!
+*/
+class Dog {
+public:
+	//In order to make sure that delete derived class will succesfully reclaim
+	//all the memory, we need to have virtual key word for all base classes's
+	//destructors
+	virtual ~Dog() {
+		std::cout << "Dog is destroyed!" << std::endl;
+	}
+};
+
+class YellowDog : public Dog {
+public:
+	~YellowDog() {
+		std::cout << "Yellow dog is destroyed!" << std::endl;
+	}
+};
+
+class DogFactory {
+public:
+	static Dog* generateYellowDog() { return (new YellowDog()); }
+	static std::shared_ptr<Dog> generateYellowDog01() {
+		return std::shared_ptr<Dog>(new YellowDog());
+	}
+};
+
+void creatDog() {
+	Dog* d1 = DogFactory::generateYellowDog();
+	delete d1;
+	//If we do not want to use virtual keyword, an alternative way is to use 
+	//shared_ptr instead of raw pointer. When shared_ptr goes out of scope,
+	//the memory reclaim will also be correct. (Note unique_ptr won't work!)
+	//For d2, even dog's destructor is not virtual, it will work as well
+	std::shared_ptr<Dog> d2 = DogFactory::generateYellowDog01();
+}
+
+int main() {
+	creatDog();
+	system("pause");
+	return 0;
+}
