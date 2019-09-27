@@ -236,3 +236,31 @@ int main() {
 	return 0;
 }
 
+
+
+//*********************************************************************//
+//Section 5: Disallow Functions
+/*
+In C++ 11, we can also use delete key word to disallow a function to be 
+generated!
+*/
+class openFile{
+public:
+	//disallow copy constructor! (C++ 11)
+	openFile(openFile& rhs) = delete;
+	//make openFile(openFile& rhs) private for C++ 03
+	//private: openFile(openFile& rhs);
+	//Disable default constructor!
+	openFile(std::string name){
+		std::cout << "File opened: " << name << std::endl;
+	}
+private:
+	//A class with private destructor cannot be stored on heap! Because if it
+	//is stored on stack, when it goes out of scope, we cannot get access to
+	//destructor to destroy the class! 
+	//We have to provide destroy() function to invole destructor though. If 
+	//destructor is private!
+	~openFile(){
+		std::cout << "File destroyed!" << std::endl;
+	}
+};
