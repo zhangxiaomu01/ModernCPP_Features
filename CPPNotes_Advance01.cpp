@@ -145,3 +145,94 @@ int main() {
 
 
 
+//*********************************************************************//
+//Section 4: Compiler Generated Functions
+/*
+Compiler silently writes 4 functions if they are not explicitly declared!
+1. Copy constructor
+2. Copy assignment operator
+3. Destructor
+4. Default constructor (only if there is no constructor declared)! 
+
+Note:
+1. They are public and inline
+2. They are generated only if they are needed!
+*/
+class dog{};
+//equivalent to:
+class dog{
+public:
+	dog(const dog& rhs){...} //member by member initialization
+	dog& operator=(const dog& rhs){...}//member by member copying
+	dog(){...} //1. call base class's default constructor
+			   //2. call data member's default constructor
+	
+	~dog(){...} //1. call data member's destructor
+				//2. call base class's destructor
+};
+
+//Another example:
+/*
+1. Copy constructor				-no
+2. Copy assignment operator		-yes
+3. Destructor					-no
+4. Default constructor			-no
+*/
+class dog {
+public:
+/*
+If we have const member variable or reference member variable, then we cannot 
+do a member by member copy any more. At that case, compiler will never generate
+copy assignment operator any more!
+e.g. const std::string id = "22";
+*/
+	std::string m_name;
+	/*In c++11, we can use 
+	dog() = default;
+	to continue using the default constructor.
+	*/
+	dog(std::string name = "Bob") {
+		m_name = name;
+		std::cout << "Dog " << m_name << " is born!" << std::endl;
+	}
+	~dog() {
+		std::cout << "Dog " << m_name << " is destroyed!" << std::endl;
+	}
+};
+
+int main() {
+	dog d1("Henry");
+	dog d2;
+	d2 = d1;
+	system("pause");
+	return 0;
+}
+
+//Example 3:
+class collar {
+public:
+	collar(std::string color) {
+		std::cout << "collar is born. \n";
+	}
+};
+
+class dog {
+public:
+	collar myCollar;
+	//The following won't work because dog's default constructor will construct the
+	//reference, however, we cannot initialize the reference. We know reference 
+	//must be initialized!
+	//std::string& s;	
+};
+
+int main() {
+	//Will not work because collar does not have a default constructor. When we 
+	//create dog d1, we will call dog() default constructor, in that constructor
+	//we are supposed to call collar default constructor. However, since we already
+	//have a parametered constructor in collar, compiler cannot generate the default
+	//constructor for both classes any more!
+	dog d1;
+	system("pause");
+	return 0;
+}
+
