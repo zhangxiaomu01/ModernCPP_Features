@@ -413,3 +413,105 @@ int main() {
 	system("pause");
 	return 0;
 }
+
+
+
+//*********************************************************************//
+//Section 8: Avoid virtual function in constructor / destructor
+class dog {
+public:
+	dog() {
+		std::cout << "A dog is born!" << std::endl;
+		/*
+		Calling virtual function in constructor or destructor should generally be
+		avoided! Since in this case, when we call bark(), we will invoke the base
+		class bark() because the derived class has not been created. In destructor,
+		we will call base class bark() as well since derived class has been already
+		been destroyed! It's not good to call a function from a destroyed class.
+		*/
+		//bark();
+	}
+	virtual void bark() {
+		std::cout << "The dog is barking" << std::endl;
+	}
+	void seeCat() {
+		bark();
+	}
+	~dog() {
+		std::cout << "The dog is destroyed!" << std::endl;
+		//bark();
+	}
+};
+
+class yellowDog : public dog {
+public:
+	yellowDog() {
+		std::cout << "A yellow dog is born!" << std::endl;
+	}
+	//when bark() is defined as virtual! It implicitly becomes virtual function
+	//It's good to add virtual keyword here
+	virtual void bark() {
+		std::cout << "The yellow dog is barking!" << std::endl;
+	}
+};
+
+void createDog() {
+	yellowDog d;
+	d.seeCat();
+}
+
+int main() {
+	createDog();
+	system("pause");
+	return 0;
+}
+
+
+
+
+//*********************************************************************//
+//Section 9: Handling self-assignment
+class collar {};
+class dog {
+public:
+	collar* m_collar;
+	/* will have problem in two situations:
+	1. Self-assignment. We will delete our dog first before assignment!
+	2. constructing new collar throws an exception! 
+	then m_collar will be nullptr since we already delete it! */
+	/*
+	dog& operator=(const dog* rhs) {
+		delete m_collar;
+		m_collar = new collar(*rhs->m_collar);
+		return *this;
+	}
+	*/
+
+
+	/* solution 1: Do a check before deleting! */
+	/*
+	dog& operator=(const dog* rhs) {
+		//self-assignment safe now
+		if (rhs == this)
+			return this;
+
+		collar* pOriginalCollar = m_collar;
+		//exception safe now!
+		m_collar = new collar(*rhs->m_collar);
+		delete pOriginalCollar;
+		return *this;
+	}
+	*/
+
+	/* solution 2: Delegation! */
+	dog& operator=(const dog* rhs) {
+		//Member by member copying or call collar's assignment operator!
+		*m_collar = *rhs->m_collar;
+		return *this;
+	}
+
+};
+
+
+
+
