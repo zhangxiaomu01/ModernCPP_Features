@@ -514,4 +514,102 @@ public:
 
 
 
+//*********************************************************************//
+//Section 10: Resource acquisition is initialization
+/*
+Use Objects to manage resources: hardware device, memory, network handle etc.
+*/
+Mutex_t mu = MUTEX_INITIALIALIZER;
+void functionA(){
+	Mutex_lock(&mu);
+	//do some staff
+	Mutex_unlock(&mu); //no guarantee to always excecute
+}
+
+/**
+ * Solution:
+ */
+class Lock{
+private:
+	Mutex_t* m_mu;
+public:
+	explicit Lock(Mutex_t *pm){
+		Mutex_lock(pm);
+		m_pm = pm;
+	}
+	~Lock(){
+		Mutex_unlock(pm);
+	}
+};
+
+void functionA(){
+	Lock myLock(& mu);
+	// ....
+}//The mutex mu will always be released when myLock goes out of scope!
+
+/**
+ * Conclusion:
+ * The only code that can guarantee to execute after an exception is thrown is
+ * the destructors of objects residing in the stack.
+ * 
+ * Resource management therefore has to be tied to the lifespan of suitable
+ * objects in order to gain automatic deallocation and reclamation.
+ */
+
+
+//extra Example 1:
+/*
+Another good example of RAII: tri: shared_ptr
+*/
+int functionA(){
+	std::shared_ptr<dog> pd(new dog());
+	//... Other staff 
+}
+//when pd goes out of scope, the resources will be reclaimed!
+
+//extra Example 2:
+class dog;
+class trick;
+void trainDog(dog& d, trick& t){}
+trick getTrick();
+int main(){
+	train(shared_ptr<dog>(new dog()), getTrick());
+}
+//What happened in train()'s parameter passing
+/*
+1. new dog()
+2. getTrick()
+3. construct: shared_ptr<dog>
+The order of these operations are determined by compiler!
+It will be possible if we first execute new dog(), then getTrick().
+When executing getTrick(), an exception is thrown and shared_ptr can never
+be able to constructed, and new dog() will cause memory leak!
+
+Conclusion: do not combine storing objects in shared pointer with other 
+statement.
+*/ 
+
+
+//extra Example 3:
+/*
+What happend when resource management objects get copied?
+*/
+/* Solution 1: disallow copying. Disallow compiler generated functions. */
+
+/* Solution 2: reference count the underlying resource by using shared_ptr.
+Hard to use! */
+template<class other, class D> shared_ptr(other* ptr, D* deleter);
+//By default the deleter is "delete"
+std::shared_ptr<dog>(new dog());
+//So we can utilize the feature of the deleter function:
+class Lock{
+private:
+	std::shared_ptr<Mutex_t> m_mu;
+public:
+	explicit Lock(Mutex_t *pm): m_mu(pm, Mutex_unlock){
+		Mutex_lock(pm);
+		//Now when all the objects of Lock class goes out of scope, then m_mu
+		//will call deleter function Mutex_unlock() to unlock the mutex!
+	}
+};
 
