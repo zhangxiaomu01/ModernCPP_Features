@@ -315,3 +315,101 @@ int main() {
 	system("pause");
 	return 0;
 }
+
+
+
+//*********************************************************************//
+//Section 7: Exceptions in Destructor
+/*
+Prevent exceptions from leaving destructors.
+*/
+class dog {
+public:
+	std::string m_name;
+	dog(std::string name) {
+		m_name = name;
+		std::cout << m_name << " is born!" << std::endl;
+	}
+	~dog() {
+		std::cout << m_name << " is destroyed!" << std::endl;
+		/*
+		If we put the throw logic in destructor. Then our code will have errors. 
+		Because when two objects d1 and d2 go out of scope, then the destructors
+		will throw 2 exceptions, and C++ does not accept 2 exceptions at the same 
+		time!
+		*/
+		//throw 20;
+	}
+	void bark() { 
+		//...;
+	}
+};
+
+int main() {
+	try {
+		dog d1("Henrry");
+		dog d2("Jack");
+		//If we have throw here, it should work fine. We will only have one 
+		//exception
+		throw 20;
+		d1.bark();
+		d2.bark();
+	}
+	catch (int e) {
+		std::cout << "Exception " << e << " has thrown!" << std::endl;
+	}
+	system("pause");
+	return 0;
+}
+
+/* 
+How to hanle the situation that we want exception in destructor function?
+*/
+//Solution 1: Encapsule try ... catch in destructor! Instead of separate them to
+//different space!
+~dog() {
+	try {
+		//Encapsule all the exception prone code here
+	}
+	catch(EXCEPTION e){
+		//catch exception
+	}
+}
+
+//Solution 2: move any exception prone code into another function!
+class dog01 {
+public:
+	std::string m_name;
+	dog(std::string name) {
+		m_name = name;
+		std::cout << m_name << " is born!" << std::endl;
+	}
+	~dog() {
+		std::cout << m_name << " is destroyed!" << std::endl;
+	}
+	void prepareDestroy() {
+		//...
+		throw 20;
+		//...
+	}
+	void bark() {
+		//...;
+	}
+};
+
+int main() {
+	try {
+		dog01 d1("Henrry");
+		dog01 d2("Jack");
+		d1.bark();
+		d2.bark();
+		d1.prepareDestroy();
+		d2.prepareDestroy();
+
+	}
+	catch (int e) {
+		std::cout << "Exception " << e << " has thrown!" << std::endl;
+	}
+	system("pause");
+	return 0;
+}
