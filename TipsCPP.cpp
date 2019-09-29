@@ -23,6 +23,21 @@ std::unordered_set<std::pair<int, int>, Hash> uSet;
 auto toLowerC = [](char& c){ c = tolower(c); };
 for_each(s.begin(), s.end(), toLowerC);
 
+//1.2 3 ways to define customized comparator for priority_queue
+//a. lambda function:
+auto myComp = [](pair<int, pair<int, int>>& v1, pair<int, pair<int, int>>& v2){
+	return v1.first > v2.first;
+};
+priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, decltype(myComp)> pq(myComp);
+//b. standard templater library std::greater / std::less
+priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, greater<pair<int, pair<int, int>>>> pq;
+//c. customized functor
+struct myComp{
+	bool operator()(pair<int, pair<int, int>>& v1, pair<int, pair<int, int>>& v2){
+		return v1.first > v2.first;
+	}
+};
+priority_queue<pair<int, pair<int, int>>, vector<pair<int, pair<int, int>>>, myComp> pq;
 
 //2. std::priority_queue is the max queue, which the top element is the largest
 
