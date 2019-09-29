@@ -2094,3 +2094,8 @@ int main()
 
 
 
+//*********************************************************************
+//22. Initialize array to 0
+//Cannot be used to initialize other values!
+int K[100] = {0};
+int A[3][2] = {0};
