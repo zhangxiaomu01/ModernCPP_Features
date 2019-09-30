@@ -106,6 +106,7 @@ int main() {
 //*********************************************************************//
 //Section 13: Virtual Constructor - Clone() Function
 //we can define a virtual clone function to make the copy consistant
+//we can define a virtual clone function to make the copy consistant
 class dog {
 public:
 	//return a copy of a dog
@@ -126,6 +127,8 @@ public:
 
 void foo(dog* d) { // d is a yellow dog
 	dog* c = new dog(*d); // now copy makes a yellow dog become a dog!
+	
+	//d will call yellow dog's clone function and return a yellow dog
 	dog* c2 = d->clone(); // now c2 is actually a yellow dog
 	//...
 
@@ -141,7 +144,6 @@ int main() {
 	system("pause");
 	return 0;
 }
-
 
 
 
