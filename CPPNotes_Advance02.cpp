@@ -45,6 +45,7 @@ public:
 				   instead of the object itself*/
 	//person(const person& p) = delete;
 	//person& operator=(const person& p) = delete;
+    //person* colone() { return new person(*name_); } //if you need a copy
 	/* When in use: 
 	std::vector<person*> persons;
 	persons.push_back(new person("John"));
@@ -99,6 +100,51 @@ int main() {
 	system("pause");
 	return 0;
 }
+
+
+
+//*********************************************************************//
+//Section 13: Virtual Constructor - Clone() Function
+//we can define a virtual clone function to make the copy consistant
+class dog {
+public:
+	//return a copy of a dog
+	virtual dog* clone() {
+		return new dog(*this);
+	}
+};
+
+class yellowDog : public dog {
+public:
+	//return a copy of a yellow dog
+	//note our clone function can have different return type here
+	//co-variant return type!
+	virtual yellowDog* clone() { 
+		return new yellowDog(*this);
+	}
+};
+
+void foo(dog* d) { // d is a yellow dog
+	dog* c = new dog(*d); // now copy makes a yellow dog become a dog!
+	dog* c2 = d->clone(); // now c2 is actually a yellow dog
+	//...
+
+}
+
+int main() {
+	yellowDog d1;
+	// when we pass d1 to foo function, we are actually passing a yellow dog to 
+	//foo() function. However, we are initializing c with dog. Copy is copy, this is
+	//bad!
+	foo(&d1); 
+
+	system("pause");
+	return 0;
+}
+
+
+
+
 
 
 
