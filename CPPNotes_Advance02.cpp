@@ -150,5 +150,105 @@ int main() {
 
 //*********************************************************************//
 //Section 14: User Defined Implicit Type Conversion!
+/*
+Categories of type conversion:
+									Implicit				Explicit
+Standard type conversion:			   A						B
+User defined type conversion: 		   C						D
+														    (Casting)
+*/
+//Type A: Implicit standard type conversion
+char c = 'a';
+int k = c;  //Integral promotion!
+
+char* pc = 0;  // int to null pointer!
+
+void foo(int i){}
+foo(c);
+
+dog* pd = new yellowDog(); //pointer type conversion!
 
 
+//Type C: Implicit user defined type conversion!
+//Defined inside the class (user defined type)
+/*
+There are 2 ways to define user defined type conversion:
+1) Use constructor that can accept a single parameter.
+	- Covert other types of objects into your class
+2) Use the type conversion function
+	- Convert an object of your class into other types
+*/
+/*
+Principle: make the interface easy to use correctly and hard to use incorrectly.
+How hard is enough? Ideally, uncompilable!
+General guideline:
+1. Avoid defining seemingly unexpected conversion;
+2. Avoid defining two-way implicit conversion.
+*/
+class dog {
+private:
+	std::string name_;
+public:
+	dog(std::string name) {
+		name_ = name;
+	} //No explicit convertor
+	/*
+	If you only want to define a constructor, and no implicit type conversion,
+	always put "explicit" keyword before the constructor to avoid inadvertent
+	type conversion!
+	//explicit dog(std::string name){}
+	*/
+	std::string getName() {
+		return name_;
+	}
+
+	operator std::string() const { return name_; }
+
+};
+
+int main() {
+	std::string name = "Jack";
+	//this will work because we have an implicit type conversion
+	dog d1 = name;
+	std::cout << d1.getName() << std::endl;
+
+	//If we will use getName() function many times, we can define a type conversion
+	//function to convert an object of your class into other types
+	std::string d2 = d1;
+	std::cout << std::string(d1) << std::endl;
+	
+	system("pause");
+	return 0;
+}
+
+
+/*
+A very good example for implicit type conversion is for numeric type of class:
+for example, a rational class.
+*/
+
+class Rational {
+public:
+	int num, den;
+	//Rational is a constructor, it is also an implicit type converter!
+	Rational(int nominator = 0, int denominator = 1) : 
+		num(nominator), den(denominator) {
+
+	}
+	friend const Rational operator* (const Rational& r1, const Rational& r2); 
+};
+
+const Rational operator*(const Rational & r1, const Rational & r2)
+{
+	return Rational(r1.num * r2.num, r1.den * r2.den);
+}
+
+int main() {
+	Rational r1 = 3;
+	Rational r2 = 6;
+	Rational r3 = r1 * 7;
+	Rational r4 = 9 * r2;
+	Rational r5 = r1 * r2;
+	system("pause");
+	return 0;
+}
