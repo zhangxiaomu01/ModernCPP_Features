@@ -2099,3 +2099,18 @@ int main()
 //Cannot be used to initialize other values!
 int K[100] = {0};
 int A[3][2] = {0};
+
+
+//*********************************************************************
+//23. Remove '.' from a string
+//https://en.wikipedia.org/wiki/Erase%E2%80%93remove_idiom
+name.erase(remove(name.begin(), name.end(), '.'), name.end());
+
+
+//*********************************************************************
+//24. memset for array
+int A[256];
+memset(A, 0, sizeof(A)); //OK, all will be 0
+memset(A, -1, sizeof(A)); //OK, all will be -1
+//Wrong, memset works byte by byte! this will set each byte to be 5
+memset(A, 5, sizeof(A)); 
