@@ -2114,3 +2114,13 @@ memset(A, 0, sizeof(A)); //OK, all will be 0
 memset(A, -1, sizeof(A)); //OK, all will be -1
 //Wrong, memset works byte by byte! this will set each byte to be 5
 memset(A, 5, sizeof(A)); 
+
+
+
+//*********************************************************************
+//24. Get the positive integer part of a negative signed integer
+unsigned xu = 0;
+int x = -234;
+xu = -1 * unsigned(x); //xu will be 234 now
+//Can be used to extend the boundry of signed int and do the check with 
+//unsigned int
