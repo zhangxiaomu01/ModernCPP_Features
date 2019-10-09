@@ -2124,3 +2124,12 @@ int x = -234;
 xu = -1 * unsigned(x); //xu will be 234 now
 //Can be used to extend the boundry of signed int and do the check with 
 //unsigned int
+
+
+//*********************************************************************
+//25. Merge functions for binary search
+//C++ provides built-ins for merge sort including:
+//which stores the merged array in result
+merge(l1.begin(), l1.end(), l2.begin(), l2.end(), result.begin()); 
+//where array [begin, middle) is merged with array [middle, end).
+inplace_merge(l.begin(), l.middle, l.end()) 
