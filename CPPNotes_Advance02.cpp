@@ -252,3 +252,121 @@ int main() {
 	system("pause");
 	return 0;
 }
+
+
+
+
+//*********************************************************************//
+//Section 15: All casting considered!
+/*
+Type conversion:
+	1. Implicit type conversion
+	2. Explicit type conversion - casting
+*/
+
+//1. static_cast
+int i = 9;
+//convert one object type to another
+float f = static_cast<float>(i);
+//type conversion needs to be defined!
+dog d1 = static_cast<dog>(string("Jack"));
+//convert pointers from one type to a related type! (down / up cast)
+dog* pd = staic_cast<dog*>(new yellowDog());
+
+
+//2. dynamic_cast
+//equivalent to static_cast here!
+dog* d1 = new yellowDog();
+
+/*
+1. dynamic_cast can only work on pointers, not on objects. It converts the 
+pointers from one type to another type (down cast!);
+2. run-time check. If succeed, y1 == d1; if fails, y1 == nullptr;
+3. It requires the two types to be polymorphic (have virtual function(s)).
+*/
+yellowDog* y1 = dynamic_cast<yellowDog*>(d1);
+
+//3. const_cast
+/*
+1. Only works on pointer or reference;
+2. Only works on the same type;
+3. Cast away the constness of the object being pointed to.
+*/
+const char* str = "Hello World!";
+char* modifiedStr = const_cast<char*>(str);
+
+
+//4. reinterpret_cast
+long p = 5110980;
+//reinterpret the bits of the object pointed to!
+dog* dd = reinterpret_cast<dog*>(p);
+//The ultimate cast that can cast one pointer to **any type** of pointer.
+
+
+/*C - style cast. Inheritate from C*/
+short a = 2000;
+int i = (int)a; // c-like cast notation
+int j = int(a); //functional notation
+//A mixture of static_cast, const_cast and reinterpret_cast. (No dynamic cast)
+
+/*
+Generally, C++ style casts are preferred over c style cast:
+1. Easier to identify in the code;
+2. Less usage error. C++ style provides:
+	a) Narrowly specified purpose of each cast;
+	b) Runtime type check capability.
+*/
+
+
+/* Example with dynamic cast: */
+class dog {
+public:
+	//Remember in order to use the dynamic_cast, we need to at least have one 
+	//virtual function!
+	virtual ~dog() {
+		std::cout << "Dog is gone!" << std::endl;
+	}
+};
+
+class yellowDog : public dog {
+	int age = 3;
+public:
+	void bark() { std::cout << "Whoop!" << std::endl; }
+	void bark02() { std::cout << "Whoop!" << age << std::endl; }
+};
+/* A: 8, B: 16, C: 24, D: 16 */
+int main() {
+	dog* d1 = new dog();
+
+	yellowDog* yd1 = dynamic_cast<yellowDog*>(d1);
+
+	//If we use the static_cast, d1 will always be converted to yd1. When we 
+	//call the bark02() function, we may access the memory does not belong to
+	//yd1 (age in this case), and result in undefined behavior!
+	//yellowDog* yd1 = static_cast<yellowDog*>(d1);
+
+	yellowDog* yd2 = dynamic_cast<yellowDog*>(d1);
+
+	//Compiler will treat bark() as a static function, so it will work here.
+	//(bark() does not involve any member data)
+	//We need to check wheather yd1 is nullptr before using it!
+	yd1->bark();
+	//will crash when we call bark02. Because compiler can no longer treat 
+	//bark02() as static function!
+	//yd2->bark02();
+
+	//yd1 will be 0, since the dynamic cast fails because d1 is a dog class ptr
+	std::cout << "yd1: " << yd1 << std::endl;
+	std::cout << "d1: " << d1 << std::endl;
+	
+	system("pause");
+}
+
+
+
+
+
+
+
+
+
