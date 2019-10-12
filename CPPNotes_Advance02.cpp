@@ -320,11 +320,25 @@ Generally, C++ style casts are preferred over c style cast:
 
 /* Example with dynamic cast: */
 class dog {
+private:
+	std::string m_name;
 public:
+	dog(std::string name_){
+		m_name = name_;
+	}
 	//Remember in order to use the dynamic_cast, we need to at least have one 
 	//virtual function!
 	virtual ~dog() {
 		std::cout << "Dog is gone!" << std::endl;
+	}
+
+	//cast could be a handy hack tool
+	void showDog() const{ //*this become const (by adding const here)
+		std::cout << "Dog " << m_name << " is here!" << std::endl;
+		//Not allowed, because *this is const!
+		//m_name = "Test";
+		//If we really to change m_name:
+		const_cast<dog*>(this)->m_name = "Henry";
 	}
 };
 
@@ -363,7 +377,21 @@ int main() {
 }
 
 
+//Summary:
+/*
+===============================C++ style casting ==============================
+						Generate	Generate	risky	data type			
+						code? 		data
+Object casting:
+	static cast		  	  yes		  yes		  2	 	Any type (with type conversion)
 
+Pointer casting:
+	static_cast			  no		   no		  4     Related types
+	dynamic_cast		  yes 		   no         3     Related types (down cast)
+	const_cast			  no		   no		  1     Same types
+	reinterpret_cast	  no		   no		  5     Any types!
+
+*/
 
 
 
