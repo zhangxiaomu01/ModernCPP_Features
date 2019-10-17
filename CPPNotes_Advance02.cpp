@@ -468,3 +468,22 @@ times is also a big issue.
 */
 
 
+
+//*********************************************************************//
+//Section 17: Multiple Inheritance
+/*
+Only recommended to apply multiple inheritance for Interface segregation 
+principle. Split large interface into smaller and more specific one so that the
+client only need to know the interfaces that are of interest to them.
+
+We can define derived class to derive from multiple pure abstract class:
+An abstract class has one or more pure virtual funtion(s).
+
+A pure abstract class contians only pure virtual functions, no data and no 
+concrete functions.
+
+Summary:
+Derive only from pure abstract classes when using multiple inheritance 
+techniques.
+*/
+
