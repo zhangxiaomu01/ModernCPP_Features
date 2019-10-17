@@ -487,3 +487,29 @@ Derive only from pure abstract classes when using multiple inheritance
 techniques.
 */
 
+
+
+//*********************************************************************//
+//Section 18: Duality Of Public Inheritance
+//- Inheritance of interface
+//- Inheritance of implementation
+/*
+*Types of inheritance in C++:
+*- pure virtul function: inherit interface only;
+*- Non-virtual public function: inherit both interface and implementation;
+*- Impure virtual public function: inherit interface and defult implementation;
+*- protected function: inherit implementation only
+*
+*As a SDE, it's important to separate the concepts of interface and implementation.
+*
+*
+*Implementation inheritance is generally discouraged.
+*Guideline for use implementation inheritance:
+*1. Do not use inheritance for code reuse, use composition instead;
+*2. Minimize the implementation in base classes. Base classes should be thin.
+*3. Minimize the level of hierarchies in implementation inheritance.
+*/
+
+
+
+
