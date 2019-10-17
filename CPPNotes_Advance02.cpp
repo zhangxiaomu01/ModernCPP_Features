@@ -395,6 +395,76 @@ Pointer casting:
 
 
 
+//*********************************************************************//
+//Section 16: Static Polymorphism
+/*
+By default, when we say polymorphism, we refer to dynamic polymorphism. However, 
+dynamic polymorphism is sometimes costly for the following reasons:
+1. Memory cost for virtual table (not significant);
+2. Runtime cost for dynamic binding;
+3. The main cost is in cache thrashing, i.e., the large and unpredictable jumps 
+in execution causes frequent cache misses. In static poly., the calls are 
+either exactly predictable (static) or inlined, which reduces cache misses 
+significantly, often leading to an order of magnitude improvement in performance.
 
+*/
+/*
+We will use the static polymorphism to simulate the dynamic polymorphism 
+behavior. Then how can we implement static polymorphism? 
+1. is-a relationship between base class and derived class;
+2. Base class defines a "generic" algorithm that can be used in derived class;
+3. The "generic" algorithm is customized by the derived class.
+
+An example about the static polymorphism:
+*/
+struct TreeNode {
+	int val;
+	TreeNode* left;
+	TreeNode* right;
+};
+
+/*
+This is so called curiously recurring template pattern (static polymorphism, 
+simulated polymorphism)
+This is a small demo of TMP: template metaprogramming. The calculation of 
+some part is raised in compiler time (in this example, dynamic binding!)
+*/
+template <typename T> 
+class genericParserClass {
+public:
+//we can now still call the processNode to process specific node
+	void processNode(TreeNode* node) {
+		static_cast<T*>(this)->processNode(node);
+	}
+	void parsePreorder(TreeNode* root) {
+		if (!root) return;
+		processNode(root);
+		parsePreorder(root->left);
+		parsePreorder(root->right);
+	}
+};
+
+class specificParser : public genericParserClass<specificParser> {
+public:
+	void processNode(TreeNode* node) {
+		std::cout << "Customode processer called: " << node->val << std::endl;
+	}
+};
+
+int main() {
+	//Build tree here
+	TreeNode* root = nullptr;
+	specificParser spParser;
+	spParser.parsePreorder(root);
+
+	system("pause");
+}
+
+/*
+Disadvantages about static polymorphism:
+The main draw-back of static polymorphism: you cannot make a run-time decision 
+on which "derived class" to use. But, yes, code bloat and increased compilation
+times is also a big issue.
+*/
 
 
