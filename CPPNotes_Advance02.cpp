@@ -512,4 +512,25 @@ techniques.
 
 
 
+//*********************************************************************//
+//Section 19: Code Reuse - Inheritance vs Composition
+/*
+Composition is better than inheritance when we want to reuse code:
+1. Less code coupling between reused code and reuser of the code
+	a. Child class automatically inherits all parent class's public members.
+	b. Child class can assess parent class's protected members.
+		-Inheritance breaks encapsulation.
+
+2. Dynamic binding
+	a. Inheritance is bounded at compile time.
+	b. Composition can be bounded either at compile time or runtime.
+
+3. Flexible code construct
+	Dog				ActivityManager
+	YellowDog		OutdoorManager
+	GreyDog			IndoorManager
+	...				...
+*/
+
+
 
