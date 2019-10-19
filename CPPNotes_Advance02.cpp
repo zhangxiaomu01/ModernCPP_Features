@@ -534,3 +534,142 @@ Composition is better than inheritance when we want to reuse code:
 
 
 
+//*********************************************************************//
+//Section 20: Namespace and keyword using
+//C++ keyword: using
+//1. using directive: to bring all namespace members into current scope.
+using namespace std;
+
+//2. using declaration
+//	a. briang one specific namespace member to current scope
+//  b. bring a member from base class to current class's scope
+//Example a:
+using std::cout;
+cout << "I am good.\n";
+
+//Example b:
+using namespace std; // case 1, using directive. Global scope
+using std::cout; // case 2.a, global scope.
+
+class B{
+public:
+	void f() { std::cout << "B::f(): " << std::endl; }
+	void f(int a) { std::cout << "B::f(a): " << a << std::endl; }
+};
+
+//using B::f; //error: can only be used in class scope
+
+class D : private B{ // D is privately derived from B
+public:
+	void g(){
+		using namespace std; // case 1, local scope
+		cout << "D::g() is called.\n" << endl;
+	}
+	void h(){
+		using std::cout; //case 2.a, local scope
+		cout << "D::h() is called.\n";
+	}
+
+	//error: can not be used in the class scope
+	//using namespace std;
+	//using std::cout;
+
+	// case 2.b, class scope. Bring f(int a) and f() here
+	//This is the only one can be used in the class scope. You cannot use it
+	//in local scope or global scope!
+	using B::f; 
+};
+
+int main() {
+	D d;
+	//will not work if using B::f is not present in D
+	d.f();
+	system("pause");
+}
+
+//Name hiding:
+class B{
+public:
+	void f(int a) { std::cout << "B::f(a): " << a << std::endl; }
+};
+
+class F : public B{
+public:
+	//with this line of code, the following code will work!
+	//using B::f
+	void f() { std::cout << "F::f()." << std::endl; }
+};
+
+int main() {
+	F fclass;
+	//will not compile because f() will shade f(int a)
+	fclass.f(4);
+	system("pause");
+}
+
+
+
+//*********************************************************************//
+//Section 21: Koenig Lookup - Argument Dependent Lookup (ADL)
+//Example 1:
+namespace A{
+	struct X { };
+	void g(X x){std::cout << "calling g(X x). \n";} 
+}
+
+//If we have the global function here, the following code will not work because
+//compiler does not know which function to call
+//void g(X x){std::cout << "calling g(X x). \n";} 
+
+int main() {
+	A:: X x1;
+	A:: g(x1);
+
+	//also works because of koenig lookup or argument dependent lookup (ADL)
+	//Compiler will search the argument's namespace to find g(X x)
+	g(x1);
+	system("pause");
+}
+
+//Example 2:
+class C {
+public:
+	struct Y{};
+	static void h(Y y) { std::cout << "C::h(Y y) called.\n"; }
+};
+
+int main() {
+	C::Y y1;
+	C::h(y1);
+
+	//will not compiler, koenig lookup only works for namespace
+	//h(y1);
+	system("pause");
+}
+
+//Name hiding: namespace example
+namespace A{
+	struct X {};
+	void f(X x1){std::cout << "A::f(X x1).\n";}
+	void g(int a){std::cout << "A::g(int a). \n";}
+
+	namespace C{
+		void g(){std::cout << "A::C::g(). \n";}
+		void j(){
+			//we have to include the A::g here or the g(8) will not compile
+			//because of name hiding!
+			using A::g;
+			g(8);
+
+			//f(x1) will compile because of koenig lookup
+			X x1;
+			f(x1);
+		}
+	}
+}
+
+int main() {
+	A::C::j();
+	system("pause");
+}
+
