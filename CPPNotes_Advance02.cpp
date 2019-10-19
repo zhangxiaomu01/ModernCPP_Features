@@ -654,6 +654,7 @@ namespace A{
 	void g(int a){std::cout << "A::g(int a). \n";}
 
 	namespace C{
+		void f(){std::cout << "A::C::f().\n";}
 		void g(){std::cout << "A::C::g(). \n";}
 		void j(){
 			//we have to include the A::g here or the g(8) will not compile
@@ -672,4 +673,33 @@ int main() {
 	A::C::j();
 	system("pause");
 }
+
+/*
+Name loop-up sequence:
+----------------------------------------------------------------
+With namespaces:
+current scope => next enclosed scope => ... => global scope
+
+To override the sequence:
+1. Qualifier or using declaration
+2. Koenig lookup
+
+----------------------------------------------------------------
+With classes:
+current class scope => parent class scope => ... => global scope
+
+To override the sequence:
+1. Qualifier or using declaration
+*/
+
+/*
+Why koenig lookup? 
+Engineer principle:
+	a) Functions that operate on class C and in the same namespace with C are 
+	part of C's interface;
+	b) Functions that are part of C's interface should be in the same namespace as
+	C.
+Then by having koenig lookup, we can simplify the code when we want to call the
+function to operate on C.
+*/
 
