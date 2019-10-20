@@ -703,3 +703,124 @@ Then by having koenig lookup, we can simplify the code when we want to call the
 function to operate on C.
 */
 
+
+//*********************************************************************//
+//Section 22: Demystifying operator new / delete 
+//What happened when the following code is executed?
+
+/*
+step 1: operator new is called to allocate the memory.
+step 2: dog's constructor is called to create dog.
+step 3: if step 2 throws an exception, call operator delete to free the memory
+		allocated in step 1. (optional)
+*/
+dog* pd = new dog();
+
+/*
+step 1: dog's destructor is called.
+step 2: operator delete is called to free the memory.
+*/
+delete pd;
+
+/*
+The following code is a simplified version of standard operator new implementation.
+Note: new handler is a function invoked when operator new failed to allocate 
+memory. 
+set_new_handler() installs a new hanlder and returns current new handler (old handler).
+*/
+void* operator new(std::size_t size) throw(std::bad_alloc){
+	while(true){
+		//Allocate memory
+		void* pMem = malloc(size);
+		//Return the memory if successful
+		if(pMem)
+			return pMem;
+		
+		//Get new handler
+		std::new_handler Handler = std::set_new_handler(0);
+		std::set_new_handler(Handler);
+
+		//Invoke new handler to make more memory available. 
+		//So next iteration we will have more memory to allocate
+		if(Handler)
+			(*Handler)();
+		else
+			throw std::bad_alloc();
+	}
+}
+
+
+/*
+Member operator new
+*/
+class dog{
+	//...
+public:
+	static void* operator new(std::size_t size) throw(std::bad_alloc){
+		customizeNewForDog(size);
+		//In order to fix the error below, we need to do a check here
+		/*
+		if(size == sizeof(dog))
+			customizeNewForDog(size);
+		else
+			::operator new(size);
+		*/
+	}
+	static void operator delete(void* pMem) throw(){
+		std::cout << "Deleting a dog. \n" << std::endl;
+		customizeDeleteForDog();
+		free(pMem);
+	}
+
+	//One solution to fix our operator delete is to include a virtual destructor
+	vitrual ~dog(){}
+
+	//...
+}
+
+class yellowDog : public dog{
+	int age;
+public:
+	//Or we overload operator new in yellowDog as well
+	/*
+	static void* operator new(std::size_t size) throw(std::bad_alloc){
+		customizeNewForyellowDog(size);
+	}
+	*/
+	static void operator delete(void* pMem) throw(){
+		std::cout << "Deleting a yellow dog. \n" << std::endl;
+		customizeDeleteForYellowDog();
+		free(pMem);
+	}
+}
+
+int main(){
+	//Error: we will call dog()'s operator new in this case
+	yellowDog* pd = new yellowDog();
+	dog* pd1 = new yellowDog();
+	//when we delete dog, we will invoke dog's customized deleter. However, 
+	//we need to delete yellowDog. We cannot add virtual keyword for delete
+	//or new function because staic function and virtual function work for 
+	//different scopes.
+	delete pd1;
+}
+
+/*
+** Why do we want to customize new/delete:
+1. Usage error detection:
+	- Memory leak detection / garbage collection;
+	- Array index overrun / underrun;
+2. Improve efficiency:
+	- Clustering related objects to reduce page fault;
+	- Fixed size allocation (good for application with so many samll objects);
+	- Align similar size objects to same place to reduce fragmentation
+3. Perform additional tasks:
+	- Fill the deallocated memory with '0's =>security
+	- Collect usage statistics.
+
+
+Writing a good memory manager is HARD!
+Before writing your own version of new/delete, consider:
+1. Tweak your compiler towards your needs;
+2. Search for memory management library, e.g. Pool library from Boost
+*/
