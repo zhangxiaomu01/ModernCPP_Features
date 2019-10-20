@@ -824,3 +824,41 @@ Before writing your own version of new/delete, consider:
 1. Tweak your compiler towards your needs;
 2. Search for memory management library, e.g. Pool library from Boost
 */
+
+
+//*********************************************************************//
+//Section 23: Define your new handler
+/*
+The new handler must do one of the following things:
+- Make more memory available;
+- Install a different new handler;
+- Uninstall the new handler (passing a nullptr to it);
+- Throw an exception bad_alloc or its descendent;
+- Terminate the program.
+*/
+//An example about how to define your own new handler:
+class dog{
+private:
+	int hair[10000000000000000L];
+	std::new_handler originalHandler;
+public:
+	static void NoMemforDog(){
+		std::cout << "There is no sufficient memory for dog.\n";
+		//In order to restore new_handler sucessfully, we need to restore it
+		//before throw any exceptions. It will be more exception safe!
+		//std::set_new_handler(originalHandler);
+		throw std::bad_alloc;
+	}
+	void* operator new(std::size_t size) throw (std::bad_alloc){
+		originalHandler = std::set_new_handler(NoMemforDog);
+		//Allocate memory using standard global operator new
+		void* pMem = ::operator new(size);
+		//reset handler back to the default new_handler
+		std::set_new_handler(originalHandler);
+		return pMem;
+	}
+};
+
+int main(){
+	std::tr1::shared_ptr<dog> pd(new dog());
+}
