@@ -11,7 +11,7 @@ using namespace std;
 /* 1. C++ 11 Random Number Engine */
 /*
 *Random Engine: 
-*Stateful generator that generateds random values within predefined min
+*Stateful generator that generates random values within predefined min
 *and max. We cannot change the range here. Not truly random -- pseudorandom!
  */
 void printRandom(default_random_engine e){
@@ -21,15 +21,17 @@ void printRandom(default_random_engine e){
 }
 
 int main(){
+    //Define the default random engine.
     default_random_engine eng;
+    
+    //generate two random numbers
+    cout << "random number 1:" << eng() <<endl;
+    cout << "random number 2:" << eng() <<endl;
+
     //output the min and max values of default random engine. The two values
     //define the range.
     cout << "min value: " << eng.min() <<endl;
     cout << "max value: " << eng.max() <<endl;
-
-    //generate two random numbers
-    cout << "random number 1:" << eng() <<endl;
-    cout << "random number 2:" << eng() <<endl;
 
     //Random engine has an internal state which determines which number
     //it should generate. The engine with the same state will always produce
@@ -48,17 +50,23 @@ int main(){
     default_random_engine e;
     default_random_engine e1;
     //The following code will produce exactly the same result!
-    //3499211612 581869302 3890346734 3586334585 545404204 
-	//4161255391 3922919429 949333985 2715962298 1323567403
+    //3499211612 581869302 3890346734 3586334585 545404204 4161255391 3922919429
+    //949333985 2715962298 1323567403
     printRandom(e);
     printRandom(e1);
 
+    //We typically use chrono library method as our seed. Then each time when we
+    //run our program, we are guaranteed to have a distinct set of random numbers.
+    //The following function gent the total number of counts since the epoch
+    //of computer time. 
+    //(00:00 January 1st, 1970 (coordinated Universal Time – UTC))
     unsigned int seed = chrono::steady_clock::now().time_since_epoch().count();
     //with seed, the random engine will be able to generate different 
     //sets of random numbers! It determines the internal state of the engine
     default_random_engine e3(seed);
     printRandom(e3);
 
+    //seed() method can change the state of default random engine.
     e.seed(); //set engine to initial state
     e.seed(109); //set engine to a state to seed 109
 
@@ -103,6 +111,7 @@ int main(){
     uniform_real_distribution<float> distrR(0, 5);
     cout << distrR(e) << endl; 
 
+    //We can easily generate other distributions.
     //poisson distribution
     poisson_distribution<int> distrP(1.0); // 1.0 is the mean
     cout << distrP(e) << endl; 
@@ -117,6 +126,8 @@ int main(){
             v[num]++; //v[num] represents the frequency of num
         }
     }
+    //Try to run the code, and you can see the distribution 
+    //yourself!
     for(int i = 0; i < 20; i++){
         cout <<"  " << std::string(v[i], '+') << endl;
     }
