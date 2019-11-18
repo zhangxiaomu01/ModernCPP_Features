@@ -10,6 +10,7 @@ auto hasher = [](pair<char, int>& p){
 };
 */
 struct Hash{
+	//we must include const before pair<int, int>& p
      size_t operator()(const pair<int, int>& p) const{
          //hash<long long>() create a hash() variable with default constructor
          //then we call this varibale(val) to do the actual hash.
@@ -629,7 +630,7 @@ void dijkstra(){
 Bellman Ford's Algorithm:
 Bellman Ford's algorithm is used to find the shortest paths from the source 
 vertex to all other vertices in a weighted graph. It depends on the following 
-concept: Shortest path contains at most  edges, because the shortest path 
+concept: Shortest path contains at most n-1 edges, because the shortest path 
 couldn't have a cycle.
 
 So why shortest path shouldn't have a cycle ?
@@ -646,7 +647,7 @@ distance + edge weight".
 This algorithm depends on the relaxation principle where the shortest distance 
 for all vertices is gradually replaced by more accurate values until eventually 
 reaching the optimum solution. In the beginning all vertices have a distance 
-of "Infinity", but only the distance of the source vertex = , then update all 
+of "Infinity", but only the distance of the source vertex = 0, then update all 
 the connected vertices with the new distances (source vertex distance + edge 
 weights), then apply the same concept for the new vertices with new distances 
 and so on.
