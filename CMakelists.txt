@@ -1,11 +1,15 @@
 cmake_minimum_required(VERSION 3.13)
 
-project(CppFeatures)
+project(CppFeatures VERSION 0.1)
+# species the compiler version
 set(CMAKE_CXX_STANDARD 14)
 
 # Define our cpp files here
 file(GLOB_RECURSE MY_SOURCES CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp")
 
 add_executable(CppFeatures "${MY_SOURCES}")
+# species the CPP version
+target_compile_features(CppFeatures PUBLIC cxx_std_14)
+
 target_include_directories(CppFeatures PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/")
 #target_link_libraries(main1 PRIVATE someLib)
