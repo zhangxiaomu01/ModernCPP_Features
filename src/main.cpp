@@ -1,9 +1,9 @@
 #include<windows.h>
 #include<iostream>
 
-#include<test.h>
+#include<SimpleThreadPool.h>
 
 int main() {
     std::cout << "Good one!" << std::endl;
-    printUs();
+    // printUs();
 }
