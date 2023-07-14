@@ -42,3 +42,21 @@ class SimpleThreadPool{
                 void operator()();
         };
 };
+
+
+/**
+ * The following code snipts shows how to use the thread pool.
+*/
+// void testThreadPool() {
+//     SimpleThreadPool thread_pool(4);
+//     thread_pool.Init();
+
+//     for (int i = 0; i < 100; ++i) {
+//         task newTask = []() {
+//             std::cout << "This is a task" << std::endl;
+//         };
+//         thread_pool.Submit(newTask);
+//     }
+//     std::cout << "task submited" << std::endl;
+//     thread_pool.Shutdown();
+// }
