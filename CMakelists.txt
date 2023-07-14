@@ -13,4 +13,5 @@ add_executable(CppFeatures "${MY_SOURCES}")
 target_compile_features(CppFeatures PUBLIC cxx_std_14)
 
 target_include_directories(CppFeatures PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/concurrent")
+target_include_directories(CppFeatures PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include/patterns")
 #target_link_libraries(main1 PRIVATE someLib)
