@@ -28,7 +28,7 @@ class SimpleThreadPool{
 
         void Shutdown();
 
-        void Submit(task t);
+        std::future<void> Submit(task t);
 
     private:
         class WorkerThread {
@@ -37,7 +37,7 @@ class SimpleThreadPool{
                 std::unique_ptr<SimpleThreadPool> m_thread_pool;
             
             public:
-                WorkerThread(std::unique_ptr<SimpleThreadPool> thread_pool, int id);
+                WorkerThread(SimpleThreadPool* thread_pool, int id);
 
                 void operator()();
         };
