@@ -11,9 +11,10 @@
 #include "AdapterPattern.hpp"
 #include "ProxyPattern.hpp"
 #include "BridgePattern.hpp"
+#include "TemplateMethodPattern.hpp"
 
 int main() {
-    BridgePatternNameSpace::TestDesignPattern();
+    TemplateMethodPatternNameSpace::TestDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
