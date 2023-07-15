@@ -10,9 +10,10 @@
 #include "CommandPattern.hpp"
 #include "AdapterPattern.hpp"
 #include "ProxyPattern.hpp"
+#include "BridgePattern.hpp"
 
 int main() {
-    ProxyPatternNameSpace::TestDesignPattern();
+    BridgePatternNameSpace::TestDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
