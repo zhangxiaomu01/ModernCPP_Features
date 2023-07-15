@@ -5,9 +5,10 @@
 #include "StrategyPattern.hpp"
 #include "ObserverPattern.hpp"
 #include "DecoratorPattern.hpp"
+#include "FactoryPattern.hpp"
 
 int main() {
-    DecoratorPatternNameSpace::testDesignPattern();
+    FactoryPatternNameSpace::testDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
