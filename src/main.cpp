@@ -14,9 +14,10 @@
 #include "TemplateMethodPattern.hpp"
 #include "CompositionPattern.hpp"
 #include "IteratorPattern.hpp"
+#include "StatePattern.hpp"
 
 int main() {
-    IteratorPatternNameSpace::TestDesignPattern();
+    StatePatternNameSpace::TestDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
