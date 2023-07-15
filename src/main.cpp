@@ -13,9 +13,10 @@
 #include "BridgePattern.hpp"
 #include "TemplateMethodPattern.hpp"
 #include "CompositionPattern.hpp"
+#include "IteratorPattern.hpp"
 
 int main() {
-    CompositionPatternNameSpace::TestDesignPattern();
+    IteratorPatternNameSpace::TestDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
