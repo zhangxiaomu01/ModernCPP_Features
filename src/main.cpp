@@ -3,9 +3,10 @@
 
 #include "SimpleThreadPool.h"
 #include "StrategyPattern.hpp"
+#include "ObserverPattern.hpp"
 
 int main() {
-    StrategyPatternNameSpace::testDesignPattern();
+    ObserverPatternNameSpace::testDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
