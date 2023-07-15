@@ -9,9 +9,10 @@
 #include "SingletonPattern.hpp"
 #include "CommandPattern.hpp"
 #include "AdapterPattern.hpp"
+#include "ProxyPattern.hpp"
 
 int main() {
-    AdapterPatternNameSpace::TestDesignPattern();
+    ProxyPatternNameSpace::TestDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
