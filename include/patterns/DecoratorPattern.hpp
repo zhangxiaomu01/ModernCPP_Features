@@ -59,7 +59,7 @@ namespace DecoratorPatternNameSpace {
         }
     };
 
-    void testDesignPattern() {
+    void TestDesignPattern() {
         //Note coffee is the base, is a must. While we can always add different 
         //add-on ingrediants in it
         BeverageClass* bv = new MilkClass(new SugarClass(new CoffeeClass()));

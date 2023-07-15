@@ -27,7 +27,7 @@ namespace SingletonPatternNameSpace {
     };
 
 
-    void testDesignPattern() {
+    void TestDesignPattern() {
         //Directly call the getInstance() function by class
         static Singleton sInstance = Singleton::getInstance(6);
         sInstance.printVal();

@@ -95,7 +95,7 @@ namespace StrategyPatternNameSpace {
 		}
 	};
 
-	void testDesignPattern() {
+	void TestDesignPattern() {
 		Duck WhiteDuck("Jack", DuckColor::WHITE, new FreeFly(), new WarningQuack());
 		Duck BlackDuck("Mark", DuckColor::BLACK, new LongRangeFly(), new NormalQuack());
 		WhiteDuck.DuckInfo();

@@ -119,7 +119,7 @@ namespace FactoryPatternNameSpace {
     };
 
 
-    void testDesignPattern() {
+    void TestDesignPattern() {
         SpawnerLevel1 spawnL1;
         spawnL1.SpawnEnemy();
         SpawnerLevel2 spawnL2;

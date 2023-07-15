@@ -7,9 +7,10 @@
 #include "DecoratorPattern.hpp"
 #include "FactoryPattern.hpp"
 #include "SingletonPattern.hpp"
+#include "CommandPattern.hpp"
 
 int main() {
-    SingletonPatternNameSpace::testDesignPattern();
+    CommandPatternNameSpace::TestDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }

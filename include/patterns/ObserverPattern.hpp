@@ -123,7 +123,7 @@ namespace ObserverPatternNameSpace {
         }
     };
 
-    void testDesignPattern() {
+    void TestDesignPattern() {
         WheatherInfo currentWL(75.0f, 67.0f);
         PhoneDisplay* myPhone = new PhoneDisplay(&currentWL);
         LCDDisplay* myLCD = new LCDDisplay(&currentWL);
