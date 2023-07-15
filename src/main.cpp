@@ -8,9 +8,10 @@
 #include "FactoryPattern.hpp"
 #include "SingletonPattern.hpp"
 #include "CommandPattern.hpp"
+#include "AdapterPattern.hpp"
 
 int main() {
-    CommandPatternNameSpace::TestDesignPattern();
+    AdapterPatternNameSpace::TestDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
