@@ -12,9 +12,10 @@
 #include "ProxyPattern.hpp"
 #include "BridgePattern.hpp"
 #include "TemplateMethodPattern.hpp"
+#include "CompositionPattern.hpp"
 
 int main() {
-    TemplateMethodPatternNameSpace::TestDesignPattern();
+    CompositionPatternNameSpace::TestDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
