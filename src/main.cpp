@@ -6,9 +6,10 @@
 #include "ObserverPattern.hpp"
 #include "DecoratorPattern.hpp"
 #include "FactoryPattern.hpp"
+#include "SingletonPattern.hpp"
 
 int main() {
-    FactoryPatternNameSpace::testDesignPattern();
+    SingletonPatternNameSpace::testDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
