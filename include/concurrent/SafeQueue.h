@@ -37,7 +37,7 @@ class SafeQueue {
             return true;
         }
 
-        T top() {
+        T front() {
             std::unique_lock<std::mutex> lock(m_mutex);
             return std::move(m_queue.front());
         }

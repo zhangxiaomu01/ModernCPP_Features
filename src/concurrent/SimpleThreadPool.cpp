@@ -45,7 +45,7 @@ void SimpleThreadPool::WorkerThread::operator()() {
             m_thread_pool->m_cv.wait(lock);
         }
         std::cout<<"Thread " << m_id << " is executing task! " << std::endl;
-        current_task = m_thread_pool->m_queue.top();
+        current_task = m_thread_pool->m_queue.front();
         pop_succeeded = m_thread_pool->m_queue.pop();
         if(pop_succeeded) current_task();
     }

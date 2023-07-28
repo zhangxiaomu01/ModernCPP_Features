@@ -2,6 +2,8 @@
 #include <iostream>
 
 #include "SimpleThreadPool.h"
+#include "ProducerConsumerBuffer.h"
+
 #include "StrategyPattern.hpp"
 #include "ObserverPattern.hpp"
 #include "DecoratorPattern.hpp"
@@ -17,7 +19,6 @@
 #include "StatePattern.hpp"
 
 int main() {
-    StatePatternNameSpace::TestDesignPattern();
     std::cout << "Hello world!" << std::endl;
     return 0;
 }
