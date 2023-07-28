@@ -4,6 +4,8 @@
 #include "SimpleThreadPool.h"
 #include "ProducerConsumerBuffer.h"
 
+#include "Statistic.hpp"
+
 #include "StrategyPattern.hpp"
 #include "ObserverPattern.hpp"
 #include "DecoratorPattern.hpp"
